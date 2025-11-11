@@ -81,7 +81,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
+    <section className="min-h-[60vh] md:min-h-[80vh] max-w-7xl mx-auto flex items-center justify-center bg-black relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         {movie.backdrop ? (
