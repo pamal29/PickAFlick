@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 
 export default function HorizontalScroller() {
-  const [images, setImages] = useState([]);
+  const [seriesImages, setSeriesImages] = useState([]);
+  const [movieImages, setMovieImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchTrending() {
+    async function fetchTrendingSeries() {
       try {
         console.log("🔍 Fetching trending shows...");
         const res = await fetch("http://localhost:3001/api/trending");
         
         if (!res.ok) {
-          throw new Error(`Failed to fetch: ${res.status}`);
+          throw new Error(`Failed to fetch series: ${res.status}`);
         }
         
         const data = await res.json();
         console.log("✅ Received", data.length, "shows");
         
-        // Map the API data to our image format
         const formattedImages = data.map(show => ({
           id: show.id,
           url: show.poster,
@@ -27,16 +27,46 @@ export default function HorizontalScroller() {
           year: show.releaseYear
         }));
         
-        setImages(formattedImages);
+        setSeriesImages(formattedImages);
       } catch (err) {
-        console.error("❌ Error:", err);
+        console.error("❌ Series Error:", err);
         setError(err.message);
-      } finally {
-        setLoading(false);
       }
     }
 
-    fetchTrending();
+    async function fetchTrendingMovies() {
+      try {
+        console.log("🔍 Fetching trending movies...");
+        const res = await fetch("http://localhost:3001/api/trending-movies");
+        
+        if (!res.ok) {
+          throw new Error(`Failed to fetch movies: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        console.log("✅ Received", data.length, "movies");
+        
+        const formattedImages = data.map(show => ({
+          id: show.id,
+          url: show.poster,
+          title: show.title,
+          rating: show.rating,
+          year: show.releaseYear
+        }));
+        
+        setMovieImages(formattedImages);
+      } catch (err) {
+        console.error("❌ Movies Error:", err);
+        setError(err.message);
+      }
+    }
+
+    async function fetchAll() {
+      await Promise.all([fetchTrendingSeries(), fetchTrendingMovies()]);
+      setLoading(false);
+    }
+
+    fetchAll();
   }, []);
 
   // Show loading state
@@ -44,9 +74,9 @@ export default function HorizontalScroller() {
     return (
       <div className="bg-black py-12">
         <h2 className="text-4xl font-bold text-white ml-8 mb-8">
-         Trending TV Shows
+         Loading Content...
         </h2>
-        <p className="text-center text-gray-400 text-lg">Loading Trendings...</p>
+        <p className="text-center text-gray-400 text-lg">Fetching trending shows and movies...</p>
       </div>
     );
   }
@@ -56,7 +86,7 @@ export default function HorizontalScroller() {
     return (
       <div className="bg-black py-12">
         <h2 className="text-4xl font-bold text-white ml-8 mb-8">
-         Trending TV Shows
+         Error Loading Content
         </h2>
         <p className="text-center text-red-500">⚠️ {error}</p>
         <p className="text-center text-gray-400 mt-2">Make sure your backend server is running on port 3001</p>
@@ -64,66 +94,123 @@ export default function HorizontalScroller() {
     );
   }
 
-  // Duplicate the array for seamless loop
-  const duplicatedImages = [...images, ...images];
+  // Triple the arrays for truly seamless looping
+  const triplicatedSeries = [...seriesImages, ...seriesImages, ...seriesImages];
+  const triplicatedMovies = [...movieImages, ...movieImages, ...movieImages];
 
   return (
-    <div className="bg-black py-12 overflow-hidden">
-      <h2 className="text-4xl font-bold text-white ml-8 mb-8">
-         Trending TV Shows
-      </h2>
+    <>
+      {/* TV Shows Section */}
+      <div className="bg-black py-12 overflow-hidden">
+        <h2 className="text-4xl font-bold text-white ml-8 mb-8">
+          Trending TV Shows
+        </h2>
 
-      {/* Scrolling Container */}
-      <div className="relative">
-        <div className="flex gap-6 animate-scroll">
-          {duplicatedImages.map((image, index) => (
-            <div
-              key={`${image.id}-${index}`}
-              className="relative flex-shrink-0 w-64 h-96 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 cursor-pointer"
-            >
-              <img
-                src={image.url}
-                alt={image.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/300x450/1f2937/ffffff?text=No+Image";
-                }}
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4">
-                <h3 className="text-white font-semibold text-lg truncate">
-                  {image.title}
-                </h3>
-                <p className="text-gray-300 text-sm">
-                  ⭐ {image.rating} • {image.year}
-                </p>
+        <div className="relative">
+          <div className="flex gap-6 animate-scroll">
+            {triplicatedSeries.map((image, index) => (
+              <div
+                key={`series-${image.id}-${index}`}
+                className="relative flex-shrink-0 w-64 h-96 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 cursor-pointer"
+              >
+                <img
+                  src={image.url}
+                  alt={image.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/300x450/1f2937/ffffff?text=No+Image";
+                  }}
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4">
+                  <h3 className="text-white font-semibold text-lg truncate">
+                    {image.title}
+                  </h3>
+                  <p className="text-gray-300 text-sm">
+                    ⭐ {image.rating} • {image.year}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Fade edges */}
-        <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-gray-900 to-transparent pointer-events-none"></div>
-        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-gray-900 to-transparent pointer-events-none"></div>
+          <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-black to-transparent pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-black to-transparent pointer-events-none"></div>
+        </div>
       </div>
 
-      <style jsx>{`
+      {/* Movies Section */}
+      <div className="bg-black py-12 overflow-hidden">
+        <h2 className="text-4xl font-bold text-white ml-8 mb-8">
+          Trending Movies
+        </h2>
+
+        <div className="relative">
+          <div className="flex gap-6 animate-scroll-reverse">
+            {triplicatedMovies.map((image, index) => (
+              <div
+                key={`movie-${image.id}-${index}`}
+                className="relative flex-shrink-0 w-64 h-96 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 cursor-pointer"
+              >
+                <img
+                  src={image.url}
+                  alt={image.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/300x450/1f2937/ffffff?text=No+Image";
+                  }}
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4">
+                  <h3 className="text-white font-semibold text-lg truncate">
+                    {image.title}
+                  </h3>
+                  <p className="text-gray-300 text-sm">
+                    ⭐ {image.rating} • {image.year}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-black to-transparent pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-black to-transparent pointer-events-none"></div>
+        </div>
+      </div>
+
+      <style jsx global>{`
         @keyframes scroll {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translateX(calc(-100% / 3));
+          }
+        }
+
+        @keyframes scrollReverse {
+          0% {
+            transform: translateX(calc(-100% / 3));
+          }
+          100% {
+            transform: translateX(0);
           }
         }
 
         .animate-scroll {
-          animation: scroll 40s linear infinite;
+          animation: scroll 60s linear infinite;
         }
 
         .animate-scroll:hover {
           animation-play-state: paused;
         }
+
+        .animate-scroll-reverse {
+          animation: scrollReverse 60s linear infinite;
+        }
+
+        .animate-scroll-reverse:hover {
+          animation-play-state: paused;
+        }
       `}</style>
-    </div>
+    </>
   );
 }
