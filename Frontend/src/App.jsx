@@ -1,5 +1,6 @@
 import Hero from './pages/Hero.jsx'
 import Navbar from './components/Navbar.jsx'
+import Trending from './components/Trending.jsx'
 
 function App() {
   return (
@@ -8,6 +9,10 @@ function App() {
       <Navbar />
       <div id="hero">
         <Hero />
+      </div>
+
+      <div id='trending'>
+        <Trending />
       </div>
     </div>
       

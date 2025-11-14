@@ -81,7 +81,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="min-h-[60vh] md:min-h-[80vh] max-w-7xl mx-auto flex items-center justify-center bg-black relative overflow-hidden">
+    <section className="min-h-[60vh] md:min-h-[80vh] max-w-6xl mx-auto flex items-center justify-center bg-black relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         {movie.backdrop ? (
@@ -89,7 +89,7 @@ export default function Hero() {
             key={movie.id}
             src={movie.backdrop}
             alt={movie.title}
-            className="w-full h-full object-cover opacity-60"
+            className="object-cover opacity-60"
             onError={(e) => {
               console.error('❌ Image failed to load:', movie.backdrop);
               e.target.style.display = 'none';
