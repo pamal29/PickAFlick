@@ -1,24 +1,35 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 import Hero from './pages/Hero.jsx'
 import Navbar from './components/Navbar.jsx'
 import Trending from './components/Trending.jsx'
+import Moviedetails from './pages/Moviedetails.jsx';
+import TVShowdetails from './pages/TVShowdetails.jsx';
 
 function App() {
   return (
-    <>
-    <div className="bg-black min-h-screen">
-      <Navbar />
-      <div id="hero">
-        <Hero />
-      </div>
+    <BrowserRouter>
+      <div className='bg-black min-h-screen'>
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <>
+                <Navbar />
+                <Hero />
+                <Trending />
+              </>  
+              } />        
+          
 
-      <div id='trending'>
-        <Trending />
+
+          <Route path="/movie/:id" element={<Moviedetails />} />   
+          <Route path="/tv/:id" element={<TVShowdetails />} />    
+
+        </Routes>
       </div>
-    </div>
-      
-      
-    </>
-  )
+    </BrowserRouter>
+  );
 }
 
 export default App
