@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
-export default function HorizontalScroller() {
+export default function Trending() {
   const [seriesImages, setSeriesImages] = useState([]);
   const [movieImages, setMovieImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +25,8 @@ export default function HorizontalScroller() {
           url: show.poster,
           title: show.title,
           rating: show.rating,
-          year: show.releaseYear
+          year: show.releaseYear,
+          type: 'tv'
         }));
         
         setSeriesImages(formattedImages);
@@ -46,12 +48,13 @@ export default function HorizontalScroller() {
         const data = await res.json();
         console.log("✅ Received", data.length, "movies");
         
-        const formattedImages = data.map(show => ({
-          id: show.id,
-          url: show.poster,
-          title: show.title,
-          rating: show.rating,
-          year: show.releaseYear
+        const formattedImages = data.map(movie => ({
+          id: movie.id,
+          url: movie.poster,
+          title: movie.title,
+          rating: movie.rating,
+          year: movie.releaseYear,
+          type: 'movie'
         }));
         
         setMovieImages(formattedImages);
@@ -74,7 +77,7 @@ export default function HorizontalScroller() {
     return (
       <div className="bg-black py-12">
         <h2 className="text-4xl font-bold text-white ml-8 mb-8">
-         Loading Content...
+          Loading Content...
         </h2>
         <p className="text-center text-gray-400 text-lg">Fetching trending shows and movies...</p>
       </div>
@@ -86,7 +89,7 @@ export default function HorizontalScroller() {
     return (
       <div className="bg-black py-12">
         <h2 className="text-4xl font-bold text-white ml-8 mb-8">
-         Error Loading Content
+          Error Loading Content
         </h2>
         <p className="text-center text-red-500">⚠️ {error}</p>
         <p className="text-center text-gray-400 mt-2">Make sure your backend server is running on port 3001</p>
@@ -94,7 +97,7 @@ export default function HorizontalScroller() {
     );
   }
 
-  // Triple the arrays for truly seamless looping
+  // Triple the arrays for seamless looping
   const triplicatedSeries = [...seriesImages, ...seriesImages, ...seriesImages];
   const triplicatedMovies = [...movieImages, ...movieImages, ...movieImages];
 
@@ -109,7 +112,10 @@ export default function HorizontalScroller() {
         <div className="relative">
           <div className="flex gap-6 animate-scroll">
             {triplicatedSeries.map((image, index) => (
-              <div
+              <Link
+                to={`/${image.type}/${image.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 key={`series-${image.id}-${index}`}
                 className="relative flex-shrink-0 w-64 h-96 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 cursor-pointer"
               >
@@ -121,6 +127,7 @@ export default function HorizontalScroller() {
                     e.target.src = "https://via.placeholder.com/300x450/1f2937/ffffff?text=No+Image";
                   }}
                 />
+
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4">
                   <h3 className="text-white font-semibold text-lg truncate">
                     {image.title}
@@ -129,7 +136,7 @@ export default function HorizontalScroller() {
                     ⭐ {image.rating} • {image.year}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -147,7 +154,10 @@ export default function HorizontalScroller() {
         <div className="relative">
           <div className="flex gap-6 animate-scroll-reverse">
             {triplicatedMovies.map((image, index) => (
-              <div
+              <Link
+                to={`/${image.type}/${image.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 key={`movie-${image.id}-${index}`}
                 className="relative flex-shrink-0 w-64 h-96 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 cursor-pointer"
               >
@@ -167,7 +177,7 @@ export default function HorizontalScroller() {
                     ⭐ {image.rating} • {image.year}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
