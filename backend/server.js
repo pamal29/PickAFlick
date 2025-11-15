@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-// const { HttpsProxyAgent } = require('https-proxy-agent');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const app = express();
 const PORT = 3001;
@@ -9,10 +9,8 @@ const PORT = 3001;
 // ⚠️ REPLACE THIS WITH YOUR TMDB API KEY
 const TMDB_API_KEY = 'e7876fbc19d54844090f8bb90f9d768e';
 
-// 🌐 PROXY CONFIGURATION
-// Replace with your proxy IP and port
-// const PROXY_HOST = '192.168.16.2';  
-// const PROXY_PORT = 3128;            
+const PROXY_HOST = '192.168.16.2';  
+const PROXY_PORT = 3128;            
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/original';
@@ -23,11 +21,10 @@ app.use(express.json());
 let heroMovies = [];
 let currentHeroIndex = 0;
 
-// Create proxy agent
-// const proxyUrl = `http://${PROXY_HOST}:${PROXY_PORT}`;
-// const proxyAgent = new HttpsProxyAgent(proxyUrl);
+const proxyUrl = `http://${PROXY_HOST}:${PROXY_PORT}`;
+const proxyAgent = new HttpsProxyAgent(proxyUrl);
 
-// console.log(`🌐 Using Proxy: ${proxyUrl}`);
+console.log(`🌐 Using Proxy: ${proxyUrl}`);
 
 // Format movie data
 function formatMovie(movie) {
@@ -55,7 +52,7 @@ async function fetchHeroMovies() {
         language: 'en-US',
         page: 1
       },
-      // httpsAgent: proxyAgent,
+      httpsAgent: proxyAgent,
       timeout: 30000,
       headers: {
         'Accept': 'application/json',
@@ -90,10 +87,10 @@ async function fetchHeroMovies() {
     } else if (error.request) {
       console.error('   ❌ NO RESPONSE FROM TMDB SERVER');
       console.error('   Error code:', error.code);
-      // console.error('\n   🔧 Proxy might not be working. Check:');
-      // console.error(`   - Proxy IP: ${PROXY_HOST}`);
-      // console.error(`   - Proxy Port: ${PROXY_PORT}`);
-      // console.error('   - Make sure the proxy address and port are correct\n');
+      console.error('\n   🔧 Proxy might not be working. Check:');
+      console.error(`   - Proxy IP: ${PROXY_HOST}`);
+      console.error(`   - Proxy Port: ${PROXY_PORT}`);
+      console.error('   - Make sure the proxy address and port are correct\n');
     } else {
       console.error(`   Unexpected error: ${error.message}`);
     }
@@ -111,7 +108,7 @@ app.get('/api/hero/current', (req, res) => {
   res.json(heroMovies[currentHeroIndex]);
 });
 
-//Fetch trending tv-series
+// Fetch trending tv-series
 app.get('/api/trending', async (req, res) => {
   try {
     console.log('📺 Fetching trending TV shows...');
@@ -121,7 +118,7 @@ app.get('/api/trending', async (req, res) => {
         api_key: TMDB_API_KEY,
         language: 'en-US'      
       },
-      // httpsAgent: proxyAgent,
+      httpsAgent: proxyAgent,
       timeout: 30000,
       headers:{
         'accept':'application/json',
@@ -133,7 +130,7 @@ app.get('/api/trending', async (req, res) => {
       // Map and format TV show data
       const trendingShows = response.data.results.slice(0, 20).map(show => ({
         id: show.id,
-        title: show.name || show.original_name, // TV shows use 'name' instead of 'title'
+        title: show.name || show.original_name,
         description: show.overview,
         rating: show.vote_average ? show.vote_average.toFixed(1) : 'N/A',
         releaseYear: show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'N/A',
@@ -152,8 +149,7 @@ app.get('/api/trending', async (req, res) => {
   }
 });
 
-
-//Fetch trending Movies
+// Fetch trending Movies
 app.get('/api/trending-movies', async (req, res) => {
   try {
     console.log('🎬 Fetching trending movies...');
@@ -163,6 +159,7 @@ app.get('/api/trending-movies', async (req, res) => {
         api_key: TMDB_API_KEY,
         language: 'en-US'
       },
+      httpsAgent: proxyAgent,
       timeout: 30000,
       headers: {
         'accept': 'application/json',
@@ -199,6 +196,108 @@ app.get('/api/trending-movies', async (req, res) => {
   }
 });
 
+// Fetch single movie details
+app.get('/api/movie/:id', async (req, res) => {
+  const movieId = req.params.id;
+
+  try {
+    console.log(`🎞 Fetching details for movie ID: ${movieId}`);
+
+    const response = await axios.get(`${TMDB_BASE_URL}/movie/${movieId}`, {
+      params: {
+        api_key: TMDB_API_KEY,
+        language: 'en-US'
+      },
+      httpsAgent: proxyAgent,
+      timeout: 30000,
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.data) {
+      return res.status(404).json({ error: 'Movie not found' });
+    }
+
+    const movie = response.data;
+
+    const formatted = {
+      id: movie.id,
+      title: movie.title,
+      overview: movie.overview,
+      rating: movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A',
+      releaseYear: movie.release_date
+        ? new Date(movie.release_date).getFullYear()
+        : 'N/A',
+      genres: movie.genres ? movie.genres.map(g => g.name) : [],
+      poster: movie.poster_path ? TMDB_IMAGE_BASE + movie.poster_path : null,
+      backdrop: movie.backdrop_path ? TMDB_IMAGE_BASE + movie.backdrop_path : null,
+      runtime: movie.runtime,
+      status: movie.status,
+      tagline: movie.tagline
+    };
+
+    res.json(formatted);
+    console.log(`✅ Movie fetched: ${formatted.title}`);
+
+  } catch (error) {
+    console.error('❌ Error fetching movie:', error.message);
+    res.status(500).json({ error: 'Failed to fetch movie details' });
+  }
+});
+
+// Fetch single TV show details ⭐ NEW ENDPOINT ⭐
+app.get('/api/tv/:id', async (req, res) => {
+  const tvId = req.params.id;
+
+  try {
+    console.log(`📺 Fetching details for TV show ID: ${tvId}`);
+
+    const response = await axios.get(`${TMDB_BASE_URL}/tv/${tvId}`, {
+      params: {
+        api_key: TMDB_API_KEY,
+        language: 'en-US'
+      },
+      httpsAgent: proxyAgent,
+      timeout: 30000,
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.data) {
+      return res.status(404).json({ error: 'TV show not found' });
+    }
+
+    const show = response.data;
+
+    const formatted = {
+      id: show.id,
+      title: show.name,
+      overview: show.overview,
+      rating: show.vote_average ? show.vote_average.toFixed(1) : 'N/A',
+      releaseYear: show.first_air_date
+        ? new Date(show.first_air_date).getFullYear()
+        : 'N/A',
+      genres: show.genres ? show.genres.map(g => g.name) : [],
+      poster: show.poster_path ? TMDB_IMAGE_BASE + show.poster_path : null,
+      backdrop: show.backdrop_path ? TMDB_IMAGE_BASE + show.backdrop_path : null,
+      numberOfSeasons: show.number_of_seasons,
+      numberOfEpisodes: show.number_of_episodes,
+      status: show.status,
+      tagline: show.tagline
+    };
+
+    res.json(formatted);
+    console.log(`✅ TV show fetched: ${formatted.title}`);
+
+  } catch (error) {
+    console.error('❌ Error fetching TV show:', error.message);
+    res.status(500).json({ error: 'Failed to fetch TV show details' });
+  }
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -208,7 +307,7 @@ app.get('/api/health', (req, res) => {
     apiKeySet: TMDB_API_KEY !== 'YOUR_TMDB_API_KEY_HERE',
     apiKeyLength: TMDB_API_KEY.length,
     currentMovie: heroMovies.length > 0 ? heroMovies[currentHeroIndex].title : 'None',
-    // proxy: `${PROXY_HOST}:${PROXY_PORT}`
+    proxy: `${PROXY_HOST}:${PROXY_PORT}`
   });
 });
 
@@ -240,7 +339,7 @@ async function init() {
   console.log('🎬 TMDB Movie Server Starting...');
   console.log('═══════════════════════════════════════\n');
   
-  // console.log(`🌐 Proxy: ${PROXY_HOST}:${PROXY_PORT}\n`);
+  console.log(`🌐 Proxy: ${PROXY_HOST}:${PROXY_PORT}\n`);
   
   // Check if API key is set
   if (TMDB_API_KEY === 'YOUR_TMDB_API_KEY_HERE') {
@@ -266,6 +365,10 @@ async function init() {
     console.log('═══════════════════════════════════════');
     console.log(`\n📍 Available endpoints:`);
     console.log(`   http://localhost:${PORT}/api/hero/current`);
+    console.log(`   http://localhost:${PORT}/api/trending`);
+    console.log(`   http://localhost:${PORT}/api/trending-movies`);
+    console.log(`   http://localhost:${PORT}/api/movie/:id`);
+    console.log(`   http://localhost:${PORT}/api/tv/:id ⭐ NEW`);
     console.log(`   http://localhost:${PORT}/api/health`);
     console.log(`   http://localhost:${PORT}/api/refresh`);
     console.log('\n');
