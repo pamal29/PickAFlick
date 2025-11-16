@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const { HttpsProxyAgent } = require('https-proxy-agent');
+// const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const app = express();
 const PORT = 3001;
@@ -9,8 +9,8 @@ const PORT = 3001;
 // ⚠️ REPLACE THIS WITH YOUR TMDB API KEY
 const TMDB_API_KEY = 'e7876fbc19d54844090f8bb90f9d768e';
 
-const PROXY_HOST = '192.168.16.2';  
-const PROXY_PORT = 3128;            
+// const PROXY_HOST = '192.168.16.2';  
+// const PROXY_PORT = 3128;            
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/original';
@@ -21,10 +21,10 @@ app.use(express.json());
 let heroMovies = [];
 let currentHeroIndex = 0;
 
-const proxyUrl = `http://${PROXY_HOST}:${PROXY_PORT}`;
-const proxyAgent = new HttpsProxyAgent(proxyUrl);
+// // // const proxyUrl = `http://${PROXY_HOST}:${PROXY_PORT}`;
+// // // const proxyAgent = new HttpsProxyAgent(proxyUrl);
 
-console.log(`🌐 Using Proxy: ${proxyUrl}`);
+// // console.log(`🌐 Using Proxy: ${proxyUrl}`);
 
 // Format movie data
 function formatMovie(movie) {
@@ -52,7 +52,7 @@ async function fetchHeroMovies() {
         language: 'en-US',
         page: 1
       },
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       timeout: 30000,
       headers: {
         'Accept': 'application/json',
@@ -87,10 +87,10 @@ async function fetchHeroMovies() {
     } else if (error.request) {
       console.error('   ❌ NO RESPONSE FROM TMDB SERVER');
       console.error('   Error code:', error.code);
-      console.error('\n   🔧 Proxy might not be working. Check:');
-      console.error(`   - Proxy IP: ${PROXY_HOST}`);
-      console.error(`   - Proxy Port: ${PROXY_PORT}`);
-      console.error('   - Make sure the proxy address and port are correct\n');
+      // console.error('\n   🔧 Proxy might not be working. Check:');
+      // // console.error(`   - Proxy IP: ${PROXY_HOST}`);
+      // // console.error(`   - Proxy Port: ${PROXY_PORT}`);
+      // console.error('   - Make sure the proxy address and port are correct\n');
     } else {
       console.error(`   Unexpected error: ${error.message}`);
     }
@@ -118,7 +118,7 @@ app.get('/api/trending', async (req, res) => {
         api_key: TMDB_API_KEY,
         language: 'en-US'      
       },
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       timeout: 30000,
       headers:{
         'accept':'application/json',
@@ -159,7 +159,7 @@ app.get('/api/trending-movies', async (req, res) => {
         api_key: TMDB_API_KEY,
         language: 'en-US'
       },
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       timeout: 30000,
       headers: {
         'accept': 'application/json',
@@ -208,7 +208,7 @@ app.get('/api/movie/:id', async (req, res) => {
         api_key: TMDB_API_KEY,
         language: 'en-US'
       },
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       timeout: 30000,
       headers: {
         'accept': 'application/json',
@@ -259,7 +259,7 @@ app.get('/api/tv/:id', async (req, res) => {
         api_key: TMDB_API_KEY,
         language: 'en-US'
       },
-      httpsAgent: proxyAgent,
+      // httpsAgent: proxyAgent,
       timeout: 30000,
       headers: {
         'accept': 'application/json',
@@ -299,6 +299,32 @@ app.get('/api/tv/:id', async (req, res) => {
   }
 });
 
+
+//search for a movie or series
+app.get('/api/search', async (req, res)=>{
+  const query = req.query.q;
+
+  if(!query || query.trim() === ''){
+    return res.status(400).json({error: "Missing search query"}) // Fixed: was "syayus"
+  }
+
+  try{
+    const response = await axios.get('https://api.themoviedb.org/3/search/multi',{
+      params: {
+        api_key: TMDB_API_KEY,
+        query: query,
+        language: "en-us"
+      }
+    });
+
+    res.json({results: response.data.results}); // Wrapped in results object
+  } catch (e) {
+    console.error('❌ Search error:', e.message);
+    res.status(500).json({error: "Failed to fetch search results"}); // Fixed typo
+  }
+});
+
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -307,7 +333,7 @@ app.get('/api/health', (req, res) => {
     apiKeySet: TMDB_API_KEY !== 'YOUR_TMDB_API_KEY_HERE',
     apiKeyLength: TMDB_API_KEY.length,
     currentMovie: heroMovies.length > 0 ? heroMovies[currentHeroIndex].title : 'None',
-    proxy: `${PROXY_HOST}:${PROXY_PORT}`
+    // // // proxy: `${PROXY_HOST}:${PROXY_PORT}`
   });
 });
 
@@ -339,7 +365,7 @@ async function init() {
   console.log('🎬 TMDB Movie Server Starting...');
   console.log('═══════════════════════════════════════\n');
   
-  console.log(`🌐 Proxy: ${PROXY_HOST}:${PROXY_PORT}\n`);
+  // // // console.log(`🌐 Proxy: ${PROXY_HOST}:${PROXY_PORT}\n`);
   
   // Check if API key is set
   if (TMDB_API_KEY === 'YOUR_TMDB_API_KEY_HERE') {
