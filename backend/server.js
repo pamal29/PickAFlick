@@ -1,3 +1,6 @@
+
+
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -402,3 +405,16 @@ async function init() {
 }
 
 init();
+
+
+
+
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+// Add this line to debug:
+console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Found' : 'NOT FOUND');
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB connected successfully!'))
+  .catch((err) => console.log('❌ Connection failed:', err.message));
