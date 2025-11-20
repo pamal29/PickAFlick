@@ -152,7 +152,7 @@ export default function Trending() {
         </h2>
 
         <div className="relative">
-          <div className="flex gap-6 animate-scroll-reverse">
+          <div className="flex gap-6 animate-scroll">
             {triplicatedMovies.map((image, index) => (
               <Link
                 to={`/${image.type}/${image.id}`}

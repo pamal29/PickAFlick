@@ -86,7 +86,7 @@ export default function Navbar() {
         )}
 
         <span className="cursor-pointer" onClick={() => navigate("/")}>
-          SteamNest
+          PickAFlick
         </span>
       </div>
 

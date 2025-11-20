@@ -5,6 +5,7 @@ import Navbar from './components/Navbar.jsx'
 import Trending from './components/Trending.jsx'
 import Moviedetails from './pages/Moviedetails.jsx';
 import TVShowdetails from './pages/TVShowdetails.jsx';
+import Login from './pages/Login.jsx'
 
 function App() {
   return (
@@ -24,7 +25,8 @@ function App() {
 
 
           <Route path="/movie/:id" element={<Moviedetails />} />   
-          <Route path="/tv/:id" element={<TVShowdetails />} />    
+          <Route path="/tv/:id" element={<TVShowdetails />} />
+          <Route path='/login' element={<Login/>}/>
 
         </Routes>
       </div>
