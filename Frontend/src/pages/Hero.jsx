@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Star, Plus } from 'lucide-react';
+import { useNavigate} from 'react-router';
+
 
 export default function Hero() {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const handleClick= ()=>{
+    navigate("/login");
+  }
 
   const fetchCurrentMovie = async () => {
     try {
@@ -129,7 +136,9 @@ export default function Hero() {
         {/* Buttons */}
         <div className="flex space-x-4">
           
-          <button className="flex items-center space-x-2 bg-gray-800 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-700 transition-colors">
+          <button 
+            onClick={handleClick}
+            className="flex items-center space-x-2 bg-gray-800 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-700 transition-colors">
             <Plus size={20} />
             <span>My List</span>
           </button>
