@@ -1,58 +1,94 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Star, Plus } from 'lucide-react';
-import { useNavigate} from 'react-router';
-
+import { Play, Star, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Hero() {
   const [movie, setMovie] = useState(null);
+  const [nextMovie, setNextMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [cast, setCast] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [allMovies, setAllMovies] = useState([]);
 
-  const handleClick= ()=>{
-    navigate("/login");
-  }
+  const handleClick = () => {
+    console.log('Navigate to login');
+  };
 
-  const fetchCurrentMovie = async () => {
+  // Fetch cast for current movie
+  const fetchCast = async (movieId) => {
     try {
-      console.log('🎬 Fetching movie from backend...');
-      
-      const response = await fetch('http://localhost:3001/api/hero/current');
-      
-      console.log('📡 Response status:', response.status);
-      
+      const response = await fetch(`http://localhost:3001/api/movie/${movieId}/credits`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch cast');
+      }
+      const data = await response.json();
+      setCast(data.cast.slice(0, 5));
+    } catch (error) {
+      console.error('Error fetching cast:', error);
+      setCast([]);
+    }
+  };
+
+  const fetchAllMovies = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/hero/all');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
       const data = await response.json();
-      console.log('✅ Movie data received:', data.title);
-      
-      setMovie(data);
+      setAllMovies(data);
+      if (data.length > 0) {
+        setMovie(data[0]);
+        setNextMovie(data[1] || data[0]);
+        fetchCast(data[0].id);
+      }
       setLoading(false);
-      setError(null);
     } catch (error) {
-      console.error('❌ Error fetching movie:', error);
+      console.error('Error fetching movies:', error);
       setError(error.message);
       setLoading(false);
     }
   };
 
+  const transitionToNextMovie = async (direction = 'next') => {
+    if (isTransitioning || allMovies.length === 0) return;
+    
+    setIsTransitioning(true);
+    
+    let newIndex;
+    if (direction === 'next') {
+      newIndex = (currentIndex + 1) % allMovies.length;
+    } else {
+      newIndex = currentIndex === 0 ? allMovies.length - 1 : currentIndex - 1;
+    }
+    
+    const newMovie = allMovies[newIndex];
+    const nextNewMovie = allMovies[(newIndex + 1) % allMovies.length];
+    
+    fetchCast(newMovie.id);
+    
+    setTimeout(() => {
+      setMovie(newMovie);
+      setNextMovie(nextNewMovie);
+      setCurrentIndex(newIndex);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
   useEffect(() => {
-    console.log('🚀 Hero component mounted');
-    
-    // Fetch immediately on mount
-    fetchCurrentMovie();
-    
-    // Poll for updates every 2 seconds
-    const interval = setInterval(fetchCurrentMovie, 2000);
-    
-    // Cleanup on unmount
-    return () => {
-      console.log('🛑 Cleaning up interval');
-      clearInterval(interval);
-    };
+    fetchAllMovies();
   }, []);
+
+  useEffect(() => {
+    if (allMovies.length > 0) {
+      const interval = setInterval(() => {
+        transitionToNextMovie('next');
+      }, 10000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [currentIndex, allMovies, isTransitioning]);
 
   if (error) {
     return (
@@ -64,7 +100,7 @@ export default function Hero() {
             onClick={() => {
               setError(null);
               setLoading(true);
-              fetchCurrentMovie();
+              fetchAllMovies();
             }}
             className="bg-green-500 text-black px-6 py-2 rounded-full font-bold hover:bg-green-600"
           >
@@ -89,32 +125,73 @@ export default function Hero() {
 
   return (
     <section className="min-h-[60vh] md:min-h-[80vh] max-w-6xl mx-auto flex items-center justify-center bg-black relative overflow-hidden">
-      {/* Background Image */}
+      {/* Background Images with Crossfade */}
       <div className="absolute inset-0">
-        {movie.backdrop ? (
-          <img
-            key={movie.id}
-            src={movie.backdrop}
-            alt={movie.title}
-            className="object-cover opacity-60"
-            onError={(e) => {
-              console.error('❌ Image failed to load:', movie.backdrop);
-              e.target.style.display = 'none';
-            }}
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-            <p className="text-gray-600">No backdrop image available</p>
+        {/* Current Image */}
+        <div 
+          className={`absolute inset-0 transition-opacity duration-700 ${
+            isTransitioning ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          {movie.backdrop && (
+            <img
+              src={movie.backdrop}
+              alt={movie.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+          )}
+        </div>
+        
+        {/* Next Image (for smooth transition) */}
+        {nextMovie && (
+          <div 
+            className={`absolute inset-0 transition-opacity duration-700 ${
+              isTransitioning ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {nextMovie.backdrop && (
+              <img
+                src={nextMovie.backdrop}
+                alt={nextMovie.title}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
         )}
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+        
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/40" />
       </div>
 
+      {/* Navigation Arrows */}
+      <button
+        onClick={() => transitionToNextMovie('prev')}
+        disabled={isTransitioning}
+        className="absolute left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all disabled:opacity-30"
+      >
+        <ChevronLeft size={28} />
+      </button>
+      
+      <button
+        onClick={() => transitionToNextMovie('next')}
+        disabled={isTransitioning}
+        className="absolute right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all disabled:opacity-30"
+      >
+        <ChevronRight size={28} />
+      </button>
+
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center space-y-6 px-4 max-w-4xl text-center">
+      <div 
+        className={`relative z-10 flex flex-col items-center justify-center space-y-6 px-4 max-w-4xl text-center transition-all duration-500 ${
+          isTransitioning ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+        }`}
+      >
         {/* Movie Title */}
-        <h1 className="text-white font-bold text-5xl md:text-6xl">
+        <h1 className="text-white font-bold text-5xl md:text-6xl drop-shadow-2xl">
           {movie.title}
         </h1>
         
@@ -128,17 +205,57 @@ export default function Hero() {
           <span className="px-3 py-1 bg-green-500 text-black text-sm font-bold rounded">HD</span>
         </div>
 
+        {/* Cast & Crew Section with Hover Effect */}
+        {cast.length > 0 && (
+          <div className="w-full max-w-2xl">
+            <p className="text-gray-300 text-sm mb-3 font-semibold tracking-wider">STARRING</p>
+            <div className="flex justify-center gap-6 flex-wrap">
+              {cast.map((actor, index) => (
+                <div 
+                  key={index} 
+                  className="flex flex-col items-center space-y-2 transition-transform hover:scale-110 cursor-pointer"
+                >
+                  {actor.profile_path ? (
+                    <img
+                      src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
+                      alt={actor.name}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-white/30 shadow-lg hover:border-green-500 transition-all"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23333" width="100" height="100"/%3E%3Ctext fill="%23666" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="40"%3E?%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center border-2 border-white/30 hover:border-green-500 transition-all">
+                      <span className="text-gray-400 text-2xl">?</span>
+                    </div>
+                  )}
+                  <p className="text-white text-xs font-medium text-center max-w-[80px] truncate">
+                    {actor.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Description */}
-        <p className="text-white text-lg max-w-2xl line-clamp-3">
+        <p className="text-white text-lg max-w-2xl line-clamp-3 drop-shadow-lg">
           {movie.description || 'No description available'}
         </p>
         
         {/* Buttons */}
         <div className="flex space-x-4">
-          
           <button 
             onClick={handleClick}
-            className="flex items-center space-x-2 bg-gray-800 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-700 transition-colors">
+            className="flex items-center space-x-2 bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-all transform hover:scale-105 shadow-xl"
+          >
+            <Play size={20} fill="currentColor" />
+            <span>Watch Trailer</span>
+          </button>
+          <button 
+            onClick={handleClick}
+            className="flex items-center space-x-2 bg-gray-800/90 backdrop-blur text-white px-8 py-3 rounded-full font-bold hover:bg-gray-700 transition-all transform hover:scale-105 shadow-xl"
+          >
             <Plus size={20} />
             <span>My List</span>
           </button>
