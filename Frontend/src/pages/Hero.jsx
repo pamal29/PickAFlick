@@ -186,7 +186,7 @@ export default function Hero() {
 
       {/* Content */}
       <div 
-        className={`relative z-10 flex flex-col items-center justify-center space-y-6 px-4 max-w-4xl text-center transition-all duration-500 ${
+        className={`relative z-10 flex flex-col items-center justify-center space-y-6 px-4 mt-64 128 max-w-4xl text-center transition-all duration-500 ${
           isTransitioning ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
         }`}
       >
