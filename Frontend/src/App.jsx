@@ -21,9 +21,6 @@ function App() {
                 <Trending />
               </>  
               } />        
-          
-
-
           <Route path="/movie/:id" element={<Moviedetails />} />   
           <Route path="/tv/:id" element={<TVShowdetails />} />
           <Route path='/login' element={<Login/>}/>
