@@ -10,10 +10,53 @@ export default function Hero() {
   const [cast, setCast] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [allMovies, setAllMovies] = useState([]);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const userId = 'guest_user';
 
-  const handleClick = () => {
-    console.log('Navigate to login');
+  const checkWatchlist = async (movieId) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/watchlist/${userId}/check/${movieId}`);
+      const data = await res.json();
+      setInWatchlist(data.inWatchlist);
+    } catch (err) {
+      console.error('Error checking watchlist:', err);
+    }
   };
+
+  const toggleWatchlist = async () => {
+    if (!movie) return;
+    setWatchlistLoading(true);
+    try {
+      if (inWatchlist) {
+        await fetch(`http://localhost:3001/api/watchlist/${userId}/${movie.id}`, {
+          method: 'DELETE'
+        });
+        setInWatchlist(false);
+      } else {
+        await fetch(`http://localhost:3001/api/watchlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            movieId: movie.id,
+            title: movie.title,
+            poster: movie.poster,
+            type: 'movie'
+          })
+        });
+        setInWatchlist(true);
+      }
+    } catch (err) {
+      console.error('Error toggling watchlist:', err);
+    } finally {
+      setWatchlistLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (movie) checkWatchlist(movie.id);
+  }, [movie]);
 
   // Fetch cast for current movie
   const fetchCast = async (movieId) => {
@@ -246,18 +289,16 @@ export default function Hero() {
         {/* Buttons */}
         <div className="flex space-x-4">
           <button 
-            onClick={handleClick}
-            className="flex items-center space-x-2 bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-all transform hover:scale-105 shadow-xl"
+            onClick={toggleWatchlist}
+            disabled={watchlistLoading}
+            className={`flex items-center space-x-2 px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl ${
+              inWatchlist 
+                ? 'bg-green-500 text-black hover:bg-green-400' 
+                : 'bg-gray-800/90 backdrop-blur text-white hover:bg-gray-700'
+            }`}
           >
-            <Play size={20} fill="currentColor" />
-            <span>Watch Trailer</span>
-          </button>
-          <button 
-            onClick={handleClick}
-            className="flex items-center space-x-2 bg-gray-800/90 backdrop-blur text-white px-8 py-3 rounded-full font-bold hover:bg-gray-700 transition-all transform hover:scale-105 shadow-xl"
-          >
-            <Plus size={20} />
-            <span>My List</span>
+            <Plus size={20} className={inWatchlist ? 'rotate-45' : ''} />
+            <span>{watchlistLoading ? '...' : inWatchlist ? 'Added' : 'My List'}</span>
           </button>
         </div>
       </div>
