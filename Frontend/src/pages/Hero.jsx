@@ -289,6 +289,13 @@ export default function Hero() {
         {/* Buttons */}
         <div className="flex space-x-4">
           <button 
+            onClick={() => console.log('Navigate to trailer')}
+            className="flex items-center space-x-2 bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-all transform hover:scale-105 shadow-xl"
+          >
+            <Play size={20} fill="currentColor" />
+            <span>Watch Trailer</span>
+          </button>
+          <button 
             onClick={toggleWatchlist}
             disabled={watchlistLoading}
             className={`flex items-center space-x-2 px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl ${
