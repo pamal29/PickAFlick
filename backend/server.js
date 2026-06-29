@@ -59,7 +59,7 @@ async function fetchHeroMovies() {
 }
 
 // ─────────────────────────────────────────
-// Watchlist Routes (MongoDB)
+// Watchlist Routes
 // ─────────────────────────────────────────
 
 // Add to watchlist

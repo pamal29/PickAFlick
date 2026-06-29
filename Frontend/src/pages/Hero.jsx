@@ -12,7 +12,8 @@ export default function Hero() {
   const [allMovies, setAllMovies] = useState([]);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
-  const userId = 'guest_user';
+  const userId = localStorage.getItem('userId') || 'guest_user';
+  const username = localStorage.getItem('username') || 'guest';
 
   const checkWatchlist = async (movieId) => {
     try {
@@ -34,17 +35,23 @@ export default function Hero() {
         });
         setInWatchlist(false);
       } else {
-        await fetch(`http://localhost:3001/api/watchlist`, {
+        const res = await fetch(`http://localhost:3001/api/watchlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId,
+            username,
             movieId: movie.id,
             title: movie.title,
             poster: movie.poster,
             type: 'movie'
           })
         });
+
+        if (res.status === 429) {
+          alert('Your watchlist is full! (15 items max)');
+          return;
+        }
         setInWatchlist(true);
       }
     } catch (err) {
@@ -53,6 +60,8 @@ export default function Hero() {
       setWatchlistLoading(false);
     }
   };
+
+
 
   useEffect(() => {
     if (movie) checkWatchlist(movie.id);
