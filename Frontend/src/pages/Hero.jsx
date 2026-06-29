@@ -48,6 +48,9 @@ export default function Hero() {
           })
         });
 
+        const json = await res.json();
+        console.log('Watchlist response:', res.status, json);
+
         if (res.status === 429) {
           alert('Your watchlist is full! (15 items max)');
           return;
