@@ -196,9 +196,9 @@ export default function Navbar() {
             </li>
             <li 
               className="cursor-pointer hover:text-neongreen transition"
-              onClick={() => { navigate("/games"); setShowNavs(false); }}
+              onClick={() => { navigate("/watchlist"); setShowNavs(false); }}
             >
-              Games
+              My List
             </li>
             <li 
               className="cursor-pointer hover:text-neongreen transition"
