@@ -65,10 +65,19 @@ async function fetchHeroMovies() {
 // Add to watchlist
 // Add to watchlist
 app.post('/api/watchlist', async (req, res) => {
-  const { userId, movieId, title, poster, type } = req.body;
-  const { data, error } = await supabase
+  const { userId, username, movieId, title, poster, type } = req.body;
+  
+  const { count, error: countError } = await supabase
     .from('watchlist')
-    .insert({ user_id: userId, movie_id: movieId, title, poster, type });
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (countError) return res.status(500).json({ error: countError.message });
+  if (count >= 15) return res.status(429).json({ error: 'Watchlist limit reached (15 max)' });
+
+  const {data,error} = await supabase
+    .from('watchlist')
+    .insert({ user_id: userId, username, movie_id: movieId, title, poster, type });
 
   if (error) {
     if (error.code === '23505') // unique violation
