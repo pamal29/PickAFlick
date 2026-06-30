@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Star, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Hero() {
   const [movie, setMovie] = useState(null);
@@ -12,25 +14,21 @@ export default function Hero() {
   const [allMovies, setAllMovies] = useState([]);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
-  const userId = localStorage.getItem('userId') || 'guest_user';
-  const username = localStorage.getItem('username') || 'guest';
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
 
-  const checkWatchlist = async (movieId) => {
-    try {
-      const res = await fetch(`http://localhost:3001/api/watchlist/${userId}/check/${movieId}`);
-      const data = await res.json();
-      setInWatchlist(data.inWatchlist);
-    } catch (err) {
-      console.error('Error checking watchlist:', err);
-    }
-  };
+
 
   const toggleWatchlist = async () => {
+    if (!user) {
+      navigate('/login');  // redirect if not logged in
+      return;
+    }
     if (!movie) return;
     setWatchlistLoading(true);
     try {
       if (inWatchlist) {
-        await fetch(`http://localhost:3001/api/watchlist/${userId}/${movie.id}`, {
+        await fetch(`http://localhost:3001/api/watchlist/${user.id}/${movie.id}`, {
           method: 'DELETE'
         });
         setInWatchlist(false);
@@ -39,31 +37,31 @@ export default function Hero() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId,
-            username,
+            userId: user.id,
+            username: profile?.username,
             movieId: movie.id,
             title: movie.title,
             poster: movie.poster,
             type: 'movie'
           })
         });
-
-        const json = await res.json();
-        console.log('Watchlist response:', res.status, json);
-
-        if (res.status === 429) {
-          alert('Your watchlist is full! (15 items max)');
-          return;
-        }
+        if (res.status === 429) { alert('Watchlist full! (15 max)'); return; }
         setInWatchlist(true);
       }
     } catch (err) {
-      console.error('Error toggling watchlist:', err);
+      console.error(err);
     } finally {
       setWatchlistLoading(false);
     }
   };
 
+// Update checkWatchlist too:
+const checkWatchlist = async (movieId) => {
+  if (!user) return;
+  const res = await fetch(`http://localhost:3001/api/watchlist/${user.id}/check/${movieId}`);
+  const data = await res.json();
+  setInWatchlist(data.inWatchlist);
+};
 
 
   useEffect(() => {
