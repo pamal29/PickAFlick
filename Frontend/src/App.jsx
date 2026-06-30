@@ -7,6 +7,8 @@ import Moviedetails from './pages/Moviedetails.jsx';
 import TVShowdetails from './pages/TVShowdetails.jsx';
 import Login from './pages/Login.jsx';
 import WatchlistPage from './pages/WatchlistPage';
+import Register from './pages/Register';
+
 
 function App() {
   return (
@@ -25,6 +27,7 @@ function App() {
           <Route path="/movie/:id" element={<Moviedetails />} />   
           <Route path="/tv/:id" element={<TVShowdetails />} />
           <Route path='/login' element={<Login/>}/>
+          <Route path="/register" element={<Register />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
 
         </Routes>

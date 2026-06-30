@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Bell, User, AlignJustify, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function Navbar() {
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [searching, setSearching] = useState(false);
+  const { user, profile, logout } = useAuth();
 
   // 🔍 Handle search
   const handleSearch = async () => {
@@ -88,6 +90,19 @@ export default function Navbar() {
         <span className="cursor-pointer" onClick={() => navigate("/")}>
           PickAFlick
         </span>
+
+        {user ? (
+          <div className="flex items-center gap-4">
+            <span className="text-gray-300 text-sm">{profile?.username}</span>
+            <button onClick={logout} className="text-red-400 hover:text-red-300 text-sm font-semibold">
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => navigate('/login')} className="text-green-400 font-semibold">
+            Login
+          </button>
+        )}
       </div>
 
       {/* Right side */}
