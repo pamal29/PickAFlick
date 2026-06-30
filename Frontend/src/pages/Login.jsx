@@ -1,61 +1,65 @@
-import React from "react";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import supabase from '../supabaseClient';
 
 export default function Login() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const submit = async () => {
+    setError('');
+    setLoading(true);
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password
+    });
+
+    if (loginError) setError(loginError.message);
+    else navigate('/');
+
+    setLoading(false);
+  };
+
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center text-white px-4"
-      style={{
-        backgroundImage:
-          "url('/loginbg.jpg')",
-      }}
-    >
-      <div className="w-full max-w-md bg-black/70 backdrop-blur-md border-4 rounded-xl p-10">
-        
-        <p className="text-center text-5xl font-bold">Login</p>
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
+        <h1 className="text-3xl font-bold text-white mb-6">Welcome Back</h1>
 
-        <form className="mt-8 space-y-6">
+        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
-          <div className="text-xl">
-            <label htmlFor="username" className="mb-1 block">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              className="w-full bg-gray-800 border border-gray-700 rounded-md p-4 outline-none focus:border-white"
-            />
-          </div>
-
-          <div className="text-xl">
-            <label htmlFor="password" className="mb-1 block">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              className="w-full bg-gray-800 border border-gray-700 rounded-md p-4 outline-none focus:border-white"
-            />
-
-            <div className="text-right mt-2">
-              <a href="#" className="text-gray-300 text-sm hover:underline">
-                Forgot Password?
-              </a>
-            </div>
-          </div>
-
+        <div className="space-y-4">
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handle}
+            className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handle}
+            className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+          />
           <button
-            type="submit"
-            className="w-full bg-neongreen text-gray-900 font-semibold py-4 rounded-md hover:scale-105 transition"
+            onClick={submit}
+            disabled={loading}
+            className="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-3 rounded-lg transition-all"
           >
-            Sign in
+            {loading ? 'Logging in...' : 'Login'}
           </button>
-        </form>
+        </div>
 
-        <p className="text-center text-sm text-gray-300 mt-6">
-          Don't have an account?{" "}
-          <a href="#" className="text-white hover:underline">
-            Sign up
-          </a>
+        <p className="text-gray-400 text-sm mt-6 text-center">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-green-400 hover:underline">Register</Link>
         </p>
       </div>
     </div>
