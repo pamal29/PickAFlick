@@ -147,15 +147,15 @@ const checkWatchlist = async (movieId) => {
     return (
       <section className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
-          <p className="text-red-500 text-xl mb-4">❌ Error: {error}</p>
-          <p className="text-white mb-4">Make sure backend is running on http://localhost:3001</p>
+          <p className="text-danger text-xl mb-4">❌ Error: {error}</p>
+          <p className="text-textPrimary mb-4">Make sure backend is running on http://localhost:3001</p>
           <button 
             onClick={() => {
               setError(null);
               setLoading(true);
               fetchAllMovies();
             }}
-            className="bg-green-500 text-black px-6 py-2 rounded-full font-bold hover:bg-green-600"
+            className="bg-accent text-black px-6 py-2 rounded-full font-bold hover:bg-accentHover"
           >
             Retry
           </button>
@@ -168,9 +168,9 @@ const checkWatchlist = async (movieId) => {
     return (
       <section className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-white text-xl">Loading movies...</p>
-          <p className="text-gray-400 text-sm mt-2">Connecting to backend...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-textPrimary text-xl">Loading movies...</p>
+          <p className="text-textSecond text-sm mt-2">Connecting to backend...</p>
         </div>
       </section>
     );
@@ -224,7 +224,7 @@ const checkWatchlist = async (movieId) => {
       <button
         onClick={() => transitionToNextMovie('prev')}
         disabled={isTransitioning}
-        className="absolute left-4 z-20 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all disabled:opacity-30"
+        className="absolute left-4 z-20 bg-surface/50 hover:bg-surface/70 text-textPrimary p-3 rounded-full transition-all disabled:opacity-30"
       >
         <ChevronLeft size={28} />
       </button>
@@ -232,7 +232,7 @@ const checkWatchlist = async (movieId) => {
       <button
         onClick={() => transitionToNextMovie('next')}
         disabled={isTransitioning}
-        className="absolute right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all disabled:opacity-30"
+        className="absolute right-4 z-20 bg-surface/50 hover:bg-surface/70 text-textPrimary p-3 rounded-full transition-all disabled:opacity-30"
       >
         <ChevronRight size={28} />
       </button>
@@ -244,24 +244,24 @@ const checkWatchlist = async (movieId) => {
         }`}
       >
         {/* Movie Title */}
-        <h1 className="text-white font-bold text-5xl md:text-6xl drop-shadow-2xl">
+        <h1 className="text-textPrimary font-bold text-5xl md:text-6xl drop-shadow-2xl">
           {movie.title}
         </h1>
         
         {/* Movie Info */}
-        <div className="flex items-center gap-4 font-bold text-white flex-wrap justify-center">
+        <div className="flex items-center gap-4 font-bold text-textPrimary flex-wrap justify-center">
           <div className="flex items-center">
-            <Star className="text-yellow-400 mr-1" fill="currentColor" size={20} />
-            <p className="text-yellow-400">{movie.rating}</p>
+            <Star className="text-star mr-1" fill="currentColor" size={20} />
+            <p className="text-star">{movie.rating}</p>
           </div>
           <p>{movie.releaseYear}</p>
-          <span className="px-3 py-1 bg-green-500 text-black text-sm font-bold rounded">HD</span>
+          <span className="px-3 py-1 bg-accent text-black text-sm font-bold rounded">HD</span>
         </div>
 
         {/* Cast & Crew Section with Hover Effect */}
         {cast.length > 0 && (
           <div className="w-full max-w-2xl">
-            <p className="text-gray-300 text-sm mb-3 font-semibold tracking-wider">STARRING</p>
+            <p className="text-textSecond text-sm mb-3 font-semibold tracking-wider">STARRING</p>
             <div className="flex justify-center gap-6 flex-wrap">
               {cast.map((actor, index) => (
                 <div 
@@ -272,17 +272,17 @@ const checkWatchlist = async (movieId) => {
                     <img
                       src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
                       alt={actor.name}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-white/30 shadow-lg hover:border-green-500 transition-all"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-textPrimary/30 shadow-lg hover:border-accent transition-all"
                       onError={(e) => {
                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23333" width="100" height="100"/%3E%3Ctext fill="%23666" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="40"%3E?%3C/text%3E%3C/svg%3E';
                       }}
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center border-2 border-white/30 hover:border-green-500 transition-all">
-                      <span className="text-gray-400 text-2xl">?</span>
+                    <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center border-2 border-textPrimary/30 hover:border-accent transition-all">
+                      <span className="text-textSecond text-2xl">?</span>
                     </div>
                   )}
-                  <p className="text-white text-xs font-medium text-center max-w-[80px] truncate">
+                  <p className="text-textPrimary text-xs font-medium text-center max-w-[80px] truncate">
                     {actor.name}
                   </p>
                 </div>
@@ -292,30 +292,33 @@ const checkWatchlist = async (movieId) => {
         )}
 
         {/* Description */}
-        <p className="text-white text-lg max-w-2xl line-clamp-3 drop-shadow-lg">
+        <p className="text-textPrimary text-lg max-w-2xl line-clamp-3 drop-shadow-lg">
           {movie.description || 'No description available'}
         </p>
         
         {/* Buttons */}
         <div className="flex space-x-4">
+          {/* Secondary action: Trailer */}
           <button 
             onClick={() => console.log('Navigate to trailer')}
-            className="flex items-center space-x-2 bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-all transform hover:scale-105 shadow-xl"
+            className="flex items-center space-x-2 bg-surface/70 backdrop-blur border border-border text-textPrimary px-8 py-3 rounded-full font-bold hover:bg-surfaceHover transition-all transform hover:scale-105 shadow-xl"
           >
             <Play size={20} fill="currentColor" />
-            <span>Watch Trailer</span>
+            <span>Trailer</span>
           </button>
+
+          {/* Primary action: Save for Later */}
           <button 
             onClick={toggleWatchlist}
             disabled={watchlistLoading}
             className={`flex items-center space-x-2 px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl ${
               inWatchlist 
-                ? 'bg-green-500 text-black hover:bg-green-400' 
-                : 'bg-gray-800/90 backdrop-blur text-white hover:bg-gray-700'
+                ? 'bg-success text-black hover:bg-success/80' 
+                : 'bg-accent text-black hover:bg-accentHover'
             }`}
           >
             <Plus size={20} className={inWatchlist ? 'rotate-45' : ''} />
-            <span>{watchlistLoading ? '...' : inWatchlist ? 'Added' : 'My List'}</span>
+            <span>{watchlistLoading ? '...' : inWatchlist ? 'Added to Shelf' : 'Save for Later'}</span>
           </button>
         </div>
       </div>

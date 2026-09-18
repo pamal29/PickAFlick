@@ -8,29 +8,30 @@ export default {
     extend: {
       colors: {
         // Core brand
-        black:        '#0D0B14', // true background
-        surface:      '#16121F', // cards, navbar, panels
-        surfaceHover: '#1E1830', // hover state for surfaces
-        border:       '#2A2438', // subtle dividers
+        black:        '#0A0A0F', // true background
+        surface:      '#15151F', // cards, navbar, panels
+        surfaceHover: '#1F1F2E', // hover state for surfaces
+        border:       '#2A2A3D', // subtle dividers
 
-        // Rose — primary accent
-        accent:        '#E8B4B8',
-        accentHover:   '#F2C6CA',
+        // Electric blue — primary accent
+        accent:        '#3D5AFE',
+        accentHover:   '#5C74FF',
 
-        // Lavender — secondary accent
-        secondary:    '#C9A9E0',
+        // Vivid amber — secondary accent
+        secondary:      '#FFB800',
+        secondaryHover: '#FFC933',
 
         // Text
-        textPrimary: '#F5F3F7',
-        textSecond:  '#A8A2B8', // secondary labels, meta
-        textMuted:   '#6B6580', // placeholders, disabled
+        textPrimary: '#FFFFFF',
+        textSecond:  '#A3A3B8', // secondary labels, meta
+        textMuted:   '#5C5C70', // placeholders, disabled
 
         // Semantic
-        danger:      '#ff4444',
-        dangerHover: '#ff6666',
-        success:     '#8FD9A8',
-        warning:     '#f59e0b',
-        star:        '#F0C674', // ratings
+        danger:      '#FF3B5C',
+        dangerHover: '#FF6180',
+        success:     '#00E676',
+        warning:     '#FFB800',
+        star:        '#FFD60A', // ratings
       },
     },
   },
