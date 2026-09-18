@@ -7,6 +7,8 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+  console.log('Supabase Anon Key:', import.meta.env.VITE_SUPABASE_KEY);
 
   const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
