@@ -1,16 +1,68 @@
-# React + Vite
+# PickAFlick 🎬
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+PickAFlick is a movie and TV show watchlist app. Browse trending titles and save the ones you want to watch later — no streaming, just discovery and tracking.
 
-Currently, two official plugins are available:
+> 🚧 **Status:** Under active development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- 🔥 Browse trending movies and TV shows
+- ➕ Add titles to your personal watchlist
+- 🔐 User authentication (sign up / log in)
+- 📱 Responsive UI
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+**Frontend**
+- React (Vite)
+- Tailwind CSS
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Backend**
+- Node.js
+- Supabase (Auth + Database)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- A Supabase project (URL + anon key)
+
+### Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/pamal29/pickaflick.git
+cd pickaflick
+
+# Install dependencies
+npm install
+```
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_KEY=your_supabase_anon_key
+```
+
+### Run Locally
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+## Roadmap
+
+- [ ] Watchlist sorting/filtering
+- [ ] Search functionality
+- [ ] User profile enhancements
+- [ ] Deployment
+
+## License
+
+This project is for portfolio/learning purposes.
