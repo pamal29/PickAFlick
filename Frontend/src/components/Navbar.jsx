@@ -15,7 +15,6 @@ export default function Navbar() {
   const drawerRef = useRef(null);
   const searchRef = useRef(null);
 
-  // Close drawer on outside click
   useEffect(() => {
     const handler = (e) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target)) {
@@ -26,7 +25,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, [showDrawer]);
 
-  // Close search on outside click
   useEffect(() => {
     const handler = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -90,45 +88,46 @@ export default function Navbar() {
   return (
     <>
       {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-40 bg-[#0a0a0a] border-b border-[#1f1f1f] h-16 flex items-center justify-between px-6 md:px-10">
+      <nav className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-border h-16 flex items-center justify-between px-6 md:px-10">
 
         {/* Left — Hamburger + Logo */}
         <div className="flex items-center gap-5">
-          {/* Hamburger — three lines that morph to X */}
           <button
             onClick={() => setShowDrawer(!showDrawer)}
             className="flex flex-col justify-center gap-[5px] w-6 h-6 group"
             aria-label="Menu"
           >
-            <span className={`block h-[2px] bg-[#39FF14] rounded transition-all duration-300 origin-center
-              ${showDrawer ? 'rotate-45 translate-y-[7px]' : ''}`} />
-            <span className={`block h-[2px] bg-[#39FF14] rounded transition-all duration-300
+            <span className={`block h-[2px] bg-accent rounded transition-all duration-300 origin-center
+              ${showDrawer ? 'rotate-45 translate-y-[7px] bg-secondary' : ''}`} />
+            <span className={`block h-[2px] bg-accent rounded transition-all duration-300
               ${showDrawer ? 'opacity-0 scale-x-0' : ''}`} />
-            <span className={`block h-[2px] bg-[#39FF14] rounded transition-all duration-300 origin-center
-              ${showDrawer ? '-rotate-45 -translate-y-[7px]' : ''}`} />
+            <span className={`block h-[2px] bg-accent rounded transition-all duration-300 origin-center
+              ${showDrawer ? '-rotate-45 -translate-y-[7px] bg-secondary' : ''}`} />
           </button>
 
-          {/* Logo */}
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2 group"
           >
-            <Film size={22} className="text-[#39FF14]" />
-            <span className="text-white font-bold text-xl tracking-tight group-hover:text-[#39FF14] transition-colors duration-200">
-              PickAFlick
+            <div className="relative">
+              <Film size={22} className="text-secondary" />
+              <span className="absolute -inset-1.5 rounded-full bg-secondary/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            <span className="text-textPrimary font-bold text-xl tracking-tight">
+              Pick<span className="text-secondary">A</span>Flick
             </span>
           </button>
         </div>
 
         {/* Right — Search + Bells + Auth */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
 
           {/* Search */}
           <div ref={searchRef} className="relative">
             {!showSearch ? (
               <button
                 onClick={() => setShowSearch(true)}
-                className="text-[#a0a0a0] hover:text-[#39FF14] transition-colors"
+                className="text-textSecond hover:text-secondary transition-colors"
               >
                 <Search size={20} />
               </button>
@@ -144,11 +143,11 @@ export default function Navbar() {
                     if (!e.target.value.trim()) setShowResults(false);
                   }}
                   onKeyDown={handleKeyDown}
-                  className="bg-[#111111] border border-[#1f1f1f] focus:border-[#39FF14] text-white text-sm
-                    rounded-lg px-3 py-1.5 w-56 outline-none transition-colors placeholder-[#4a4a4a]"
+                  className="bg-surface border border-border focus:border-secondary text-textPrimary text-sm
+                    rounded-lg px-3 py-1.5 w-56 outline-none transition-colors placeholder-textMuted"
                 />
-                {searching && <span className="text-[#4a4a4a] text-xs">...</span>}
-                <button onClick={closeSearch} className="text-[#4a4a4a] hover:text-white transition-colors">
+                {searching && <span className="text-textMuted text-xs">...</span>}
+                <button onClick={closeSearch} className="text-textMuted hover:text-textPrimary transition-colors">
                   <X size={16} />
                 </button>
               </div>
@@ -156,8 +155,8 @@ export default function Navbar() {
 
             {/* Search results dropdown */}
             {showResults && searchResults.length > 0 && (
-              <div className="absolute top-full right-0 mt-2 w-96 bg-[#111111] border border-[#1f1f1f]
-                rounded-xl shadow-2xl max-h-96 overflow-y-auto z-50">
+              <div className="absolute top-full right-0 mt-2 w-96 bg-surface border border-border
+                rounded-xl shadow-2xl shadow-black/50 max-h-96 overflow-y-auto z-50">
                 {searchResults.map((item) => {
                   const title = item.title || item.name;
                   const year = (item.release_date || item.first_air_date || "").substring(0, 4);
@@ -170,23 +169,23 @@ export default function Navbar() {
                     <div
                       key={`${item.id}-${type}`}
                       onClick={() => handleResultClick(item)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#1a1a1a] cursor-pointer
-                        border-b border-[#1f1f1f] last:border-0 transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-surfaceHover cursor-pointer
+                        border-b border-border last:border-0 transition-colors"
                     >
                       {poster ? (
                         <img src={poster} alt={title} className="w-9 h-14 object-cover rounded" />
                       ) : (
-                        <div className="w-9 h-14 bg-[#1f1f1f] rounded flex items-center justify-center">
-                          <Film size={14} className="text-[#4a4a4a]" />
+                        <div className="w-9 h-14 bg-surfaceHover rounded flex items-center justify-center">
+                          <Film size={14} className="text-textMuted" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-semibold truncate">{title}</p>
-                        <p className="text-[#a0a0a0] text-xs capitalize">
+                        <p className="text-textPrimary text-sm font-semibold truncate">{title}</p>
+                        <p className="text-textSecond text-xs capitalize">
                           {type}{year && ` · ${year}`}
                         </p>
                         {item.vote_average > 0 && (
-                          <p className="text-[#39FF14] text-xs mt-0.5">
+                          <p className="text-star text-xs mt-0.5">
                             ★ {item.vote_average.toFixed(1)}
                           </p>
                         )}
@@ -198,37 +197,38 @@ export default function Navbar() {
             )}
 
             {showResults && searchResults.length === 0 && !searching && (
-              <div className="absolute top-full right-0 mt-2 w-80 bg-[#111111] border border-[#1f1f1f]
-                rounded-xl shadow-2xl p-5 z-50 text-center text-[#a0a0a0] text-sm">
+              <div className="absolute top-full right-0 mt-2 w-80 bg-surface border border-border
+                rounded-xl shadow-2xl shadow-black/50 p-5 z-50 text-center text-textSecond text-sm">
                 No results for "{searchTerm}"
               </div>
             )}
           </div>
 
-          <button className="text-[#a0a0a0] hover:text-[#39FF14] transition-colors">
+          <button className="relative text-textSecond hover:text-secondary transition-colors">
             <Bell size={20} />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent" />
           </button>
 
           {/* Auth — avatar or login button */}
           {user ? (
             <button
               onClick={() => setShowDrawer(true)}
-              className="flex items-center gap-2 bg-[#111111] border border-[#1f1f1f] hover:border-[#39FF14]
+              className="flex items-center gap-2 bg-surface border border-border hover:border-accent
                 rounded-full pl-1 pr-3 py-1 transition-colors group"
             >
-              <div className="w-7 h-7 rounded-full bg-[#39FF14] flex items-center justify-center">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center">
                 <span className="text-black text-xs font-bold uppercase">
                   {profile?.username?.[0] ?? '?'}
                 </span>
               </div>
-              <span className="text-[#a0a0a0] text-sm group-hover:text-white transition-colors">
+              <span className="text-textSecond text-sm group-hover:text-textPrimary transition-colors">
                 {profile?.username}
               </span>
             </button>
           ) : (
             <button
               onClick={() => navigate('/login')}
-              className="flex items-center gap-1.5 bg-[#39FF14] hover:bg-[#5aff3a] text-black
+              className="flex items-center gap-1.5 bg-accent hover:bg-accentHover text-white
                 text-sm font-bold px-4 py-1.5 rounded-full transition-colors"
             >
               <LogIn size={15} />
@@ -241,26 +241,28 @@ export default function Navbar() {
       {/* ── Backdrop ── */}
       <div
         onClick={() => setShowDrawer(false)}
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300
+        className={`fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300
           ${showDrawer ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       />
 
       {/* ── Slide-out Drawer ── */}
       <aside
         ref={drawerRef}
-        className={`fixed top-0 left-0 h-full w-72 z-50 bg-[#0f0f0f] border-r border-[#1f1f1f]
+        className={`fixed top-0 left-0 h-full w-72 z-50 bg-surface border-r border-border
           flex flex-col transform transition-transform duration-300 ease-in-out
           ${showDrawer ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#1f1f1f]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-2">
-            <Film size={18} className="text-[#39FF14]" />
-            <span className="text-white font-bold text-lg">PickAFlick</span>
+            <Film size={18} className="text-secondary" />
+            <span className="text-textPrimary font-bold text-lg">
+              Pick<span className="text-secondary">A</span>Flick
+            </span>
           </div>
           <button
             onClick={() => setShowDrawer(false)}
-            className="text-[#4a4a4a] hover:text-white transition-colors"
+            className="text-textMuted hover:text-textPrimary transition-colors"
           >
             <X size={18} />
           </button>
@@ -268,33 +270,33 @@ export default function Navbar() {
 
         {/* User block */}
         {user ? (
-          <div className="px-6 py-5 border-b border-[#1f1f1f]">
+          <div className="px-6 py-5 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#39FF14] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shrink-0">
                 <span className="text-black font-bold text-sm uppercase">
                   {profile?.username?.[0] ?? '?'}
                 </span>
               </div>
               <div>
-                <p className="text-white font-semibold text-sm">{profile?.username}</p>
-                <p className="text-[#4a4a4a] text-xs truncate">{user.email}</p>
+                <p className="text-textPrimary font-semibold text-sm">{profile?.username}</p>
+                <p className="text-textMuted text-xs truncate">{user.email}</p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="px-6 py-5 border-b border-[#1f1f1f] space-y-2">
+          <div className="px-6 py-5 border-b border-border space-y-2">
             <button
               onClick={() => { navigate('/login'); setShowDrawer(false); }}
-              className="w-full flex items-center justify-center gap-2 bg-[#39FF14] hover:bg-[#5aff3a]
-                text-black font-bold py-2.5 rounded-xl text-sm transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-accentHover
+                text-white font-bold py-2.5 rounded-xl text-sm transition-colors"
             >
               <LogIn size={15} />
               Login
             </button>
             <button
               onClick={() => { navigate('/register'); setShowDrawer(false); }}
-              className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#1f1f1f]
-                hover:border-[#39FF14] text-[#a0a0a0] hover:text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-transparent border border-border
+                hover:border-secondary text-textSecond hover:text-textPrimary font-semibold py-2.5 rounded-xl text-sm transition-colors"
             >
               <UserPlus size={15} />
               Create account
@@ -313,17 +315,17 @@ export default function Navbar() {
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
                   transition-all duration-150 group
                   ${active
-                    ? 'bg-[#39FF1415] text-[#39FF14]'
-                    : 'text-[#a0a0a0] hover:bg-[#1a1a1a] hover:text-white'
+                    ? 'bg-accent/10 text-accent'
+                    : 'text-textSecond hover:bg-surfaceHover hover:text-textPrimary'
                   }`}
               >
                 <Icon
                   size={18}
-                  className={active ? 'text-[#39FF14]' : 'text-[#4a4a4a] group-hover:text-[#39FF14] transition-colors'}
+                  className={active ? 'text-accent' : 'text-textMuted group-hover:text-secondary transition-colors'}
                 />
                 {label}
                 {active && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#39FF14]" />
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />
                 )}
               </button>
             );
@@ -332,11 +334,11 @@ export default function Navbar() {
 
         {/* Logout at bottom */}
         {user && (
-          <div className="px-3 py-4 border-t border-[#1f1f1f]">
+          <div className="px-3 py-4 border-t border-border">
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
-                text-[#ff4444] hover:bg-[#ff44441a] transition-all duration-150"
+                text-danger hover:bg-danger/10 transition-all duration-150"
             >
               <LogOut size={18} />
               Logout
