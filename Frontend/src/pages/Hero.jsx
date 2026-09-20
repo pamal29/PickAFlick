@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Star, Plus, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
+import { Play, Star, Plus, ChevronLeft, ChevronRight, Bookmark, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -56,6 +56,18 @@ export default function Hero() {
       console.error(err);
     } finally {
       setWatchlistLoading(false);
+    }
+  };
+
+  const handleRemoveFromShelf = async (item) => {
+    if (!user) return;
+    try {
+      await fetch(`http://localhost:3001/api/watchlist/${user.id}/${item.movie_id ?? item.id}`, {
+        method: 'DELETE'
+      });
+      setShelfItems(prev => prev.filter(i => i.id !== item.id));
+    } catch (err) {
+      console.error('Error removing from shelf:', err);
     }
   };
 
@@ -357,7 +369,13 @@ export default function Hero() {
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
               {shelfItems.map((item) => (
-                <PosterCard key={item.id} item={item} onClick={() => goToDetails(item)} />
+                <PosterCard
+                  key={item.id}
+                  item={item}
+                  onClick={() => goToDetails(item)}
+                  showRemove
+                  onRemove={handleRemoveFromShelf}
+                />
               ))}
             </div>
           )}
@@ -382,7 +400,7 @@ export default function Hero() {
   );
 }
 
-function PosterCard({ item, onClick, featured = false }) {
+function PosterCard({ item, onClick, featured = false, showRemove = false, onRemove  }) {
   return (
     <div onClick={onClick} className={`group cursor-pointer ${featured ? 'col-span-2 row-span-2' : ''}`}>
       <div className="relative rounded-lg overflow-hidden border border-border bg-surface aspect-[2/3]">
@@ -410,12 +428,16 @@ function PosterCard({ item, onClick, featured = false }) {
 
         <button
           onClick={(e) => {
-            e.stopPropagation();
-            // wire up to toggleWatchlist logic here if needed
+            e.stopPropagation(); // keep this — prevents navigating to details when clicking the icon
+            if (showRemove) onRemove(item);
           }}
-          className="absolute top-2 right-2 bg-black/60 backdrop-blur p-1.5 rounded-full opacity-0 group-hover:opacity-100 hover:bg-accent hover:text-black transition-all"
+          className={`absolute top-2 right-2 backdrop-blur p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all ${
+            showRemove
+              ? 'bg-black/60 hover:bg-danger hover:text-white'
+              : 'bg-black/60 hover:bg-accent hover:text-black'
+          }`}
         >
-          <Plus size={16} />
+          {showRemove ? <X size={16} /> : <Plus size={16} />}
         </button>
       </div>
       <p className="text-textPrimary text-sm font-medium mt-2 truncate">{item.title}</p>
