@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Star, Calendar, Tv, Clock, PlayCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+
 
 export default function TVShowdetails() {
   const { id } = useParams();
@@ -9,6 +11,7 @@ export default function TVShowdetails() {
   const [error, setError] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [saving, setSaving] = useState(false);
+  const {user, profile} = useAuth();
 
   useEffect(() => {
     async function fetchShow() {
@@ -35,7 +38,7 @@ export default function TVShowdetails() {
   }, [id]);
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
+    const userId = user?.id;
     if (!userId || !show) return; 
 
     fetch(`http://localhost:3001/api/watchlist/${userId}/check/${show.id}`)
@@ -44,8 +47,8 @@ export default function TVShowdetails() {
   }, [show]);
 
   const handleSave = async () => {
-    const userId = localStorage.getItem('userId');
-    const username = localStorage.getItem('username');
+    const userId = user?.id;
+    const username = profile?.username;
     if (!userId) {
       // no user logged in — decide: redirect to /login, or just return
       return;
@@ -69,7 +72,7 @@ export default function TVShowdetails() {
   };
 
   const handleRemove = async () => {
-    const userId = localStorage.getItem('userId');
+    const userId = user?.id;
     if (!userId) return;
 
     setSaving(true);
