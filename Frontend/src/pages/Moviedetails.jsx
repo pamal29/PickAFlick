@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Star, Calendar, Clock, Film } from "lucide-react";
+import { useAuth } from '../context/AuthContext';
 
 export default function Moviedetails() {
   const { id } = useParams();
@@ -9,6 +10,7 @@ export default function Moviedetails() {
   const [error, setError] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { user, profile } = useAuth();
 
   useEffect(() => {
     async function fetchMovie() {
@@ -35,7 +37,7 @@ export default function Moviedetails() {
   }, [id]);
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
+    const userId = user?.id;
     if(!userId ||!movie) return;
 
     fetch(`http://localhost:3001/api/watchlist/${userId}/${movie.id}`)
@@ -44,8 +46,8 @@ export default function Moviedetails() {
   }, [movie]);
 
   const handleSave = async () => {
-    const userId = localStorage.getItem('userId');
-    const username = localStorage.getItem('username');
+    const userId = user?.id;
+    const username = profile?.username;
     if (!userId) {
       // no user logged in — decide: redirect to /login, or just return
       return;
@@ -69,7 +71,7 @@ export default function Moviedetails() {
   };
 
   const handleRemove = async () => {
-    const userId = localStorage.getItem('userId');
+    const userId = user?.id;
     if (!userId) return;
 
     setSaving(true);
