@@ -7,6 +7,8 @@ export default function Moviedetails() {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function fetchMovie() {
@@ -31,6 +33,40 @@ export default function Moviedetails() {
 
     fetchMovie();
   }, [id]);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if(!userId ||!movie) return;
+
+    fetch(`http://localhost:3001/api/watchlist/${userId}/${movie.id}`)
+      .then((res) => res.json())
+      .then((data) => setInWatchlist(data.inWatchlist));
+  }, [movie]);
+
+  const handleSave = async () => {
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    if (!userId) {
+      // no user logged in — decide: redirect to /login, or just return
+      return;
+    }
+
+    setSaving(true);
+    await fetch('http://localhost:3001/api/watchlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        username,
+        movieId: movie.id,       
+        title: movie.title,      
+        poster: movie.poster,    
+        type: 'movie'           
+      })
+    });
+    setInWatchlist(true);
+    setSaving(false);
+  };
 
   if (loading) {
     return (
@@ -162,9 +198,13 @@ export default function Moviedetails() {
             </div>
 
             {/* Save button */}
-            <button className="mt-8 flex items-center gap-2 bg-accent text-black px-8 py-3 rounded-full font-bold hover:bg-accentHover transition-all transform hover:scale-105 shadow-xl">
-              Save for Later
-            </button>
+           <button
+            onClick={handleSave}
+            disabled={saving || inWatchlist}
+            className="mt-8 flex items-center gap-2 bg-accent text-black px-8 py-3 rounded-full font-bold hover:bg-accentHover transition-all transform hover:scale-105 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {inWatchlist ? 'Saved ✓' : saving ? 'Saving...' : 'Save for Later'}
+          </button>
           </div>
         </div>
       </div>
