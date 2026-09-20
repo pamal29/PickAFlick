@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Star, Plus, ChevronLeft, ChevronRight, Bookmark, X } from 'lucide-react';
+import { Play, Star, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useWatchlist } from '../hooks/useWatchlist';
+import ShelfSection from './ShelfSection';
+import BrowseSection from './BrowseSection';
 
 export default function Hero() {
-  // ---------- Carousel state (unchanged) ----------
+  //Carousel state
   const [movie, setMovie] = useState(null);
   const [nextMovie, setNextMovie] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,104 +17,51 @@ export default function Hero() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [allMovies, setAllMovies] = useState([]);
   const [inWatchlist, setInWatchlist] = useState(false);
-  const [watchlistLoading, setWatchlistLoading] = useState(false);
 
-  // ---------- New: shelf + browse grid state ----------
+  //Shelf + browse grid state
   const [shelfItems, setShelfItems] = useState([]);
   const [shelfLoading, setShelfLoading] = useState(true);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const { checkInWatchlist, addToWatchlist, removeFromWatchlist, loading: watchlistLoading } = useWatchlist(user, profile);
 
+  //Carousel's own save/remove toggle 
   const toggleWatchlist = async () => {
     if (!user) {
       navigate('/login');
       return;
     }
     if (!movie) return;
-    setWatchlistLoading(true);
-    try {
-      if (inWatchlist) {
-        await fetch(`http://localhost:3001/api/watchlist/${user.id}/${movie.id}`, {
-          method: 'DELETE'
-        });
-        setInWatchlist(false);
-      } else {
-        const res = await fetch(`http://localhost:3001/api/watchlist`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: user.id,
-            username: profile?.username,
-            movieId: movie.id,
-            title: movie.title,
-            poster: movie.poster,
-            type: 'movie'
-          })
-        });
-        if (res.status === 429) { alert('Watchlist full! (15 max)'); return; }
-        setInWatchlist(true);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setWatchlistLoading(false);
+
+    if (inWatchlist) {
+      await removeFromWatchlist(movie);
+      setInWatchlist(false);
+    } else {
+      const result = await addToWatchlist(movie);
+      if (result) setInWatchlist(true);
     }
   };
 
+  useEffect(() => {
+    if (movie) checkInWatchlist(movie.id).then(setInWatchlist);
+  }, [movie, user]);
+
+  //Shelf add/remove (used by browse grid + shelf grid) 
   const handleAddToShelf = async (item) => {
     if (!user) {
       navigate('/login');
       return;
     }
-    try {
-      const res = await fetch('http://localhost:3001/api/watchlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          username: profile?.username,
-          movieId: item.id,
-          title: item.title,
-          poster: item.poster,
-          type: item.type ?? 'movie' 
-        })
-      });
-      if (res.status === 429) { alert('Watchlist full! (15 max)'); return; }
-      if (res.status === 409) { return; } 
-      const newItem = await res.json();
-      setShelfItems(prev => [...prev, ...(Array.isArray(newItem) ? newItem : [newItem])]);
-    } catch (err) {
-      console.error('Error adding to shelf:', err);
-    }
+    const newItem = await addToWatchlist(item);
+    if (newItem) setShelfItems(prev => [...prev, ...(Array.isArray(newItem) ? newItem : [newItem])]);
   };
-  
+
   const handleRemoveFromShelf = async (item) => {
     if (!user) return;
-    try {
-      await fetch(`http://localhost:3001/api/watchlist/${user.id}/${item.movie_id ?? item.id}`, {
-        method: 'DELETE'
-      });
-      setShelfItems(prev => prev.filter(i => i.id !== item.id));
-    } catch (err) {
-      console.error('Error removing from shelf:', err);
-    }
+    await removeFromWatchlist(item);
+    setShelfItems(prev => prev.filter(i => i.id !== item.id));
   };
-
-  const checkWatchlist = async (movieId) => {
-    if (!user) return;
-    try {
-      const res = await fetch(`http://localhost:3001/api/watchlist/${user.id}/check/${movieId}`);
-      const data = await res.json();
-      setInWatchlist(data.inWatchlist);
-    } catch (err) {
-      console.error('Error checking watchlist:', err);
-    }
-  };
-
-  useEffect(() => {
-    if (movie) checkWatchlist(movie.id);
-  }, [movie]);
 
   const fetchCast = async (movieId) => {
     try {
@@ -181,7 +131,7 @@ export default function Hero() {
     }
   }, [currentIndex, allMovies, isTransitioning]);
 
-  // ---------- New: fetch the user's saved shelf ----------
+  //  Fetch the user's saved shelf 
   useEffect(() => {
     async function fetchShelf() {
       if (!user) {
@@ -208,7 +158,7 @@ export default function Hero() {
     navigate(path);
   };
 
-  // ---------- Error / loading states for the carousel ----------
+  //  Error / loading states for the carousel 
   if (error) {
     return (
       <section className="min-h-screen flex items-center justify-center bg-black">
@@ -244,7 +194,7 @@ export default function Hero() {
 
   return (
     <div className="bg-black min-h-screen text-textPrimary">
-      {/* ================= CAROUSEL ================= */}
+      {/* CAROUSEL */}
       <section className="min-h-[60vh] md:min-h-[80vh] max-w-6xl mx-auto flex items-center justify-center bg-black relative overflow-hidden">
         <div className="absolute inset-0">
           <div className={`absolute inset-0 transition-opacity duration-700 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
@@ -360,116 +310,23 @@ export default function Hero() {
         </div>
       </section>
 
-      {/* ================= SHELF + BROWSE GRID ================= */}
+      {/*SHELF + BROWSE GRID */}
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 space-y-16">
-        {/* YOUR SHELF */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Bookmark className="text-accent" size={22} />
-              <h2 className="text-2xl font-bold">Your Shelf</h2>
-            </div>
-            {shelfItems.length > 0 && (
-              <span className="text-textMuted text-sm">{shelfItems.length} saved</span>
-            )}
-          </div>
+        <ShelfSection
+          user={user}
+          shelfItems={shelfItems}
+          shelfLoading={shelfLoading}
+          onNavigateLogin={() => navigate('/login')}
+          onCardClick={goToDetails}
+          onRemove={handleRemoveFromShelf}
+        />
 
-          {!user ? (
-            <div className="bg-surface border border-border rounded-xl p-8 text-center">
-              <p className="text-textSecond mb-4">Log in to start building your personal shelf.</p>
-              <button
-                onClick={() => navigate('/login')}
-                className="bg-accent text-black px-6 py-2.5 rounded-full font-bold hover:bg-accentHover transition-all"
-              >
-                Log In
-              </button>
-            </div>
-          ) : shelfLoading ? (
-            <div className="text-textMuted">Loading your shelf...</div>
-          ) : shelfItems.length === 0 ? (
-            <div className="bg-surface border border-dashed border-border rounded-xl p-10 text-center">
-              <p className="text-textSecond text-lg mb-1">Your shelf is empty</p>
-              <p className="text-textMuted text-sm">
-                Start collecting — tap "Save for Later" on anything you like.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-              {shelfItems.map((item) => (
-                <PosterCard
-                  key={item.id}
-                  item={item}
-                  onClick={() => goToDetails(item)}
-                  showRemove
-                  onRemove={handleRemoveFromShelf}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* BROWSE / COLLECTION GRID */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Browse the Collection</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
-            {allMovies.map((item, i) => (
-              <PosterCard
-                key={item.id}
-                item={item}
-                onClick={() => goToDetails(item)}
-                featured={i % 7 === 0}
-                onAdd={handleAddToShelf}
-              />
-            ))}
-          </div>
-        </section>
+        <BrowseSection
+          allMovies={allMovies}
+          onCardClick={goToDetails}
+          onAdd={handleAddToShelf}
+        />
       </div>
-    </div>
-  );
-}
-
-function PosterCard({ item, onClick, featured = false, showRemove = false, onRemove, onAdd }) {
-  return (
-    <div onClick={onClick} className={`group cursor-pointer ${featured ? 'col-span-2 row-span-2' : ''}`}>
-      <div className="relative rounded-lg overflow-hidden border border-border bg-surface aspect-[2/3]">
-        {item.poster ? (
-          <img
-            src={item.poster}
-            alt={item.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/300x450/15151F/ffffff?text=No+Image';
-            }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-textMuted text-sm">
-            No image
-          </div>
-        )}
-
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-end p-3 opacity-0 group-hover:opacity-100">
-          <div className="flex items-center gap-1 text-star text-sm font-bold">
-            <Star size={14} fill="currentColor" />
-            {item.rating}
-          </div>
-        </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); 
-            if (showRemove) onRemove(item);
-            else onAdd?.(item);
-          }}
-          className={`absolute top-2 right-2 backdrop-blur p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all ${
-            showRemove
-              ? 'bg-black/60 hover:bg-danger hover:text-white'
-              : 'bg-black/60 hover:bg-accent hover:text-black'
-          }`}
-        >
-          {showRemove ? <X size={16} /> : <Plus size={16} />}
-        </button>
-      </div>
-      <p className="text-textPrimary text-sm font-medium mt-2 truncate">{item.title}</p>
     </div>
   );
 }
