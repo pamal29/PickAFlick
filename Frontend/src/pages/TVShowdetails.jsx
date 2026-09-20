@@ -68,6 +68,18 @@ export default function TVShowdetails() {
     setSaving(false);
   };
 
+  const handleRemove = async () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    setSaving(true);
+    await fetch(`http://localhost:3001/api/watchlist/${userId}/${show.id}`, {
+      method: 'DELETE'
+    });
+    setInWatchlist(false);
+    setSaving(false);
+  };
+
   if (loading) {
     return (
       <div className="bg-black min-h-screen flex items-center justify-center">
@@ -212,11 +224,15 @@ export default function TVShowdetails() {
 
             {/* Save button */}
             <button
-              onClick={handleSave}
-              disabled={saving || inWatchlist}
-              className="mt-8 flex items-center gap-2 bg-accent text-black px-8 py-3 rounded-full font-bold hover:bg-accentHover transition-all transform hover:scale-105 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={inWatchlist ? handleRemove : handleSave}
+              disabled={saving}
+              className={`mt-8 flex items-center gap-2 px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed ${
+                inWatchlist
+                  ? 'bg-danger text-white hover:bg-danger/80'
+                  : 'bg-accent text-black hover:bg-accentHover'
+              }`}
             >
-              {inWatchlist ? 'Saved ✓' : saving ? 'Saving...' : 'Save for Later'}
+              {saving ? 'Saving...' : inWatchlist ? 'Remove from List' : 'Save for Later'}
             </button>
           </div>
         </div>
