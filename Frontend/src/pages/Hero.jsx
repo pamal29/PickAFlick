@@ -59,6 +59,33 @@ export default function Hero() {
     }
   };
 
+  const handleAddToShelf = async (item) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const res = await fetch('http://localhost:3001/api/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          username: profile?.username,
+          movieId: item.id,
+          title: item.title,
+          poster: item.poster,
+          type: item.type ?? 'movie' 
+        })
+      });
+      if (res.status === 429) { alert('Watchlist full! (15 max)'); return; }
+      if (res.status === 409) { return; } 
+      const newItem = await res.json();
+      setShelfItems(prev => [...prev, ...(Array.isArray(newItem) ? newItem : [newItem])]);
+    } catch (err) {
+      console.error('Error adding to shelf:', err);
+    }
+  };
+  
   const handleRemoveFromShelf = async (item) => {
     if (!user) return;
     try {
@@ -391,6 +418,7 @@ export default function Hero() {
                 item={item}
                 onClick={() => goToDetails(item)}
                 featured={i % 7 === 0}
+                onAdd={handleAddToShelf}
               />
             ))}
           </div>
@@ -400,7 +428,7 @@ export default function Hero() {
   );
 }
 
-function PosterCard({ item, onClick, featured = false, showRemove = false, onRemove  }) {
+function PosterCard({ item, onClick, featured = false, showRemove = false, onRemove, onAdd }) {
   return (
     <div onClick={onClick} className={`group cursor-pointer ${featured ? 'col-span-2 row-span-2' : ''}`}>
       <div className="relative rounded-lg overflow-hidden border border-border bg-surface aspect-[2/3]">
@@ -428,8 +456,9 @@ function PosterCard({ item, onClick, featured = false, showRemove = false, onRem
 
         <button
           onClick={(e) => {
-            e.stopPropagation(); // keep this — prevents navigating to details when clicking the icon
+            e.stopPropagation(); 
             if (showRemove) onRemove(item);
+            else onAdd?.(item);
           }}
           className={`absolute top-2 right-2 backdrop-blur p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all ${
             showRemove
