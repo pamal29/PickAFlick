@@ -13,35 +13,44 @@ export default function Register() {
   const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const submit = async () => {
-    setError('');
-    if (!form.username || !form.email || !form.password) {
-      setError('All fields are required.');
-      return;
-    }
+  setError('');
+  if (!form.username || !form.email || !form.password) {
+    setError('All fields are required.');
+    return;
+  }
 
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('username', form.username)
-      .single();
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('username', form.username)
+    .single();
 
-    if (existing) {
-      setError('Username already taken.');
-      return;
-    }
+  if (existing) {
+    setError('Username already taken.');
+    return;
+  }
 
-    setLoading(true);
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: { data: { username: form.username } }
-    });
+  setLoading(true);
+  const { data, error: signUpError } = await supabase.auth.signUp({
+    email: form.email,
+    password: form.password,
+    options: { data: { username: form.username } }
+  });
 
-    if (signUpError) setError(signUpError.message);
-    else navigate('/');
-
+  if (signUpError) {
+    setError(signUpError.message);
     setLoading(false);
-  };
+    return;
+  }
+
+  if (data.user) {
+    localStorage.setItem('userId', data.user.id);
+    localStorage.setItem('username', form.username);
+  }
+
+  navigate('/');
+  setLoading(false);
+};
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') submit();
