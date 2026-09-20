@@ -12,7 +12,7 @@ export function useWatchlist(user, profile) {
     return data.inWatchlist;
   };
 
-  const addToWatchlist = async (item) => {
+  const addToWatchlist = async (item, type = 'movie') => {
     setLoading(true);
     try {
       const res = await fetch(API, {
@@ -24,7 +24,7 @@ export function useWatchlist(user, profile) {
           movieId: item.id,
           title: item.title,
           poster: item.poster,
-          type: item.type ?? 'movie'
+          type: item.type ?? type
         })
       });
       if (res.status === 429) { alert('Watchlist full! (15 max)'); return null; }
