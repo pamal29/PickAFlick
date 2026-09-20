@@ -13,18 +13,35 @@ export default function Login() {
   const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const submit = async () => {
-    setError('');
-    setLoading(true);
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password
-    });
+  setError('');
+  setLoading(true);
 
-    if (loginError) setError(loginError.message);
-    else navigate('/');
+  const { data, error: loginError } = await supabase.auth.signInWithPassword({
+    email: form.email,
+    password: form.password
+  });
 
+  if (loginError) {
+    setError(loginError.message);
     setLoading(false);
-  };
+    return;
+  }
+
+  const user = data.user;
+
+  // pull username from your profiles table
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('id', user.id)
+    .single();
+
+  localStorage.setItem('userId', user.id);
+  localStorage.setItem('username', profile?.username || user.email);
+
+  navigate('/');
+  setLoading(false);
+};
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') submit();
