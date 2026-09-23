@@ -3,8 +3,8 @@ import { Play, Star, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../hooks/useWatchlist';
-import ShelfSection from './ShelfSection';
-import BrowseSection from './BrowseSection';
+import ShelfSection from '../components/ShelfSection';
+import BrowseSection from '../components/BrowseSection';
 
 export default function Hero() {
   //Carousel state
