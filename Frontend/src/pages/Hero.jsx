@@ -142,7 +142,7 @@ export default function Hero() {
         const res = await fetch(`http://localhost:3001/api/watchlist/${user.id}`);
         if (!res.ok) throw new Error('Failed to fetch watchlist');
         const data = await res.json();
-        setShelfItems(data);
+        setShelfItems(data.map(row => ({ ...row, id: row.movie_id })));
       } catch (err) {
         console.error('Error fetching shelf:', err);
         setShelfItems([]);
