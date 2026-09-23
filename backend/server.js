@@ -294,6 +294,15 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
+app.delete('/api/account/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 // ─────────────────────────────────────────
 // Start Server 
 // ─────────────────────────────────────────
