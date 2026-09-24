@@ -11,7 +11,7 @@ export function AuthProvider({ children }) {
   const fetchProfile = async (userId) => {
     const { data } = await supabase
       .from('profiles')
-      .select('username')
+      .select('username, avatar_url')
       .eq('id', userId)
       .single();
     setProfile(data);
@@ -39,8 +39,13 @@ export function AuthProvider({ children }) {
     setProfile(null);
   };
 
+  // Re-pull the profile row after an edit (username/avatar change)
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, logout, refreshProfile }}>
       {!loading && children}
     </AuthContext.Provider>
   );
