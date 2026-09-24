@@ -212,7 +212,7 @@ export default function Navbar() {
           {/* Auth — avatar or login button */}
           {user ? (
             <button
-              onClick={() => setShowDrawer(true)}
+              onClick={() => navigate('/profile')}
               className="flex items-center gap-2 bg-surface border border-border hover:border-accent
                 rounded-full pl-1 pr-3 py-1 transition-colors group"
             >

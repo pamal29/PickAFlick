@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../supabaseClient';
+import  supabase  from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
 export default function ProfileSettings() {
