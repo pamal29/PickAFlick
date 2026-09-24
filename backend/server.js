@@ -161,23 +161,42 @@ app.get('/api/movie/:id/credits', async (req, res) => {
 });
 
 //fetch trailer link
+//fetch trailer link
 app.get('/api/movie/:id/videos', async (req, res) => {
   try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${req.params.id}/videos?api_key=${process.env.TMDB_API_KEY}`
-    );
-    if (!response.ok) throw new Error('Failed to fetch videos');
-    const data = await response.json();
-
+    const response = await axios.get(`${TMDB_BASE_URL}/movie/${req.params.id}/videos`, {
+      params: { api_key: TMDB_API_KEY, language: 'en-US' },
+      timeout: 30000
+    });
+    const results = response.data.results || [];
     const trailer =
-      data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube' && v.official) ||
-      data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') ||
-      data.results.find(v => v.site === 'YouTube');
+      results.find(v => v.type === 'Trailer' && v.site === 'YouTube' && v.official) ||
+      results.find(v => v.type === 'Trailer' && v.site === 'YouTube') ||
+      results.find(v => v.site === 'YouTube');
 
     res.json({ key: trailer?.key || null });
   } catch (err) {
-    console.error('Error fetching videos:', err);
-    res.status(500).json({ key: null, error: err.message });
+    console.error('❌ Error fetching videos:', err.message);
+    res.status(500).json({ key: null, error: 'Failed to fetch videos' });
+  }
+});
+
+app.get('/api/tv/:id/videos', async (req, res) => {
+  try {
+    const response = await axios.get(`${TMDB_BASE_URL}/tv/${req.params.id}/videos`, {
+      params: { api_key: TMDB_API_KEY, language: 'en-US' },
+      timeout: 30000
+    });
+    const results = response.data.results || [];
+    const trailer =
+      results.find(v => v.type === 'Trailer' && v.site === 'YouTube' && v.official) ||
+      results.find(v => v.type === 'Trailer' && v.site === 'YouTube') ||
+      results.find(v => v.site === 'YouTube');
+
+    res.json({ key: trailer?.key || null });
+  } catch (err) {
+    console.error('❌ Error fetching videos:', err.message);
+    res.status(500).json({ key: null, error: 'Failed to fetch videos' });
   }
 });
 
