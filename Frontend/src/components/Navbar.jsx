@@ -216,10 +216,18 @@ export default function Navbar() {
               className="flex items-center gap-2 bg-surface border border-border hover:border-accent
                 rounded-full pl-1 pr-3 py-1 transition-colors group"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center">
-                <span className="text-black text-xs font-bold uppercase">
-                  {profile?.username?.[0] ?? '?'}
-                </span>
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center overflow-hidden">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-black text-xs font-bold uppercase">
+                    {profile?.username?.[0] ?? '?'}
+                  </span>
+                )}
               </div>
               <span className="text-textSecond text-sm group-hover:text-textPrimary transition-colors">
                 {profile?.username}
@@ -272,10 +280,18 @@ export default function Navbar() {
         {user ? (
           <div className="px-6 py-5 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shrink-0">
-                <span className="text-black font-bold text-sm uppercase">
-                  {profile?.username?.[0] ?? '?'}
-                </span>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shrink-0 overflow-hidden">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-black font-bold text-sm uppercase">
+                    {profile?.username?.[0] ?? '?'}
+                  </span>
+                )}
               </div>
               <div>
                 <p className="text-textPrimary font-semibold text-sm">{profile?.username}</p>

@@ -10,6 +10,7 @@ import TVShowdetails from './pages/TVShowdetails.jsx';
 import Login from './pages/Login.jsx';
 import WatchlistPage from './pages/WatchlistPage';
 import Register from './pages/Register';
+import ProfileSettings from './pages/ProfileSettings.jsx';
 
 function App() {
 
@@ -43,6 +44,15 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route
+            path="/profile"
+            element={
+              <>
+                <Navbar />
+                <ProfileSettings />
+              </>
+            }
+          />
         </Routes>
       </div>
     </BrowserRouter>
