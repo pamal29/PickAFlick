@@ -195,7 +195,7 @@ export default function Hero() {
   return (
     <div className="bg-black min-h-screen text-textPrimary">
       {/* CAROUSEL */}
-      <section className="min-h-[60vh] md:min-h-[80vh] max-w-6xl mx-auto flex items-center justify-center bg-black relative overflow-hidden">
+      <section className="min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] w-full flex items-center justify-center bg-black relative overflow-hidden">
         <div className="absolute inset-0">
           <div className={`absolute inset-0 transition-opacity duration-700 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {movie.backdrop && (
@@ -223,58 +223,60 @@ export default function Hero() {
         <button
           onClick={() => transitionToNextMovie('prev')}
           disabled={isTransitioning}
-          className="absolute left-4 z-20 bg-surface/50 hover:bg-surface/70 text-textPrimary p-3 rounded-full transition-all disabled:opacity-30"
+          className="absolute left-2 sm:left-4 z-20 bg-surface/50 hover:bg-surface/70 text-textPrimary p-2 sm:p-3 rounded-full transition-all disabled:opacity-30"
         >
-          <ChevronLeft size={28} />
+          <ChevronLeft size={20} className="sm:hidden" />
+          <ChevronLeft size={28} className="hidden sm:block" />
         </button>
 
         <button
           onClick={() => transitionToNextMovie('next')}
           disabled={isTransitioning}
-          className="absolute right-4 z-20 bg-surface/50 hover:bg-surface/70 text-textPrimary p-3 rounded-full transition-all disabled:opacity-30"
+          className="absolute right-2 sm:right-4 z-20 bg-surface/50 hover:bg-surface/70 text-textPrimary p-2 sm:p-3 rounded-full transition-all disabled:opacity-30"
         >
-          <ChevronRight size={28} />
+          <ChevronRight size={20} className="sm:hidden" />
+          <ChevronRight size={28} className="hidden sm:block" />
         </button>
 
         <div
-          className={`relative z-10 flex flex-col items-center justify-center space-y-6 px-4 mt-64 max-w-4xl text-center transition-all duration-500 ${
+          className={`relative z-10 flex flex-col items-center justify-center space-y-4 sm:space-y-6 px-4 sm:px-6 mt-24 sm:mt-40 md:mt-64 max-w-4xl text-center transition-all duration-500 ${
             isTransitioning ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
           }`}
         >
-          <h1 className="text-textPrimary font-bold text-5xl md:text-6xl drop-shadow-2xl">
+          <h1 className="text-textPrimary font-bold text-2xl sm:text-4xl md:text-6xl drop-shadow-2xl leading-tight">
             {movie.title}
           </h1>
 
-          <div className="flex items-center gap-4 font-bold text-textPrimary flex-wrap justify-center">
+          <div className="flex items-center gap-2 sm:gap-4 font-bold text-textPrimary flex-wrap justify-center text-sm sm:text-base">
             <div className="flex items-center">
-              <Star className="text-star mr-1" fill="currentColor" size={20} />
+              <Star className="text-star mr-1" fill="currentColor" size={16} />
               <p className="text-star">{movie.rating}</p>
             </div>
             <p>{movie.releaseYear}</p>
-            <span className="px-3 py-1 bg-accent text-black text-sm font-bold rounded">HD</span>
+            <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-accent text-black text-xs sm:text-sm font-bold rounded">HD</span>
           </div>
 
           {cast.length > 0 && (
             <div className="w-full max-w-2xl">
-              <p className="text-textSecond text-sm mb-3 font-semibold tracking-wider">STARRING</p>
-              <div className="flex justify-center gap-6 flex-wrap">
+              <p className="text-textSecond text-xs sm:text-sm mb-2 sm:mb-3 font-semibold tracking-wider">STARRING</p>
+              <div className="flex justify-center gap-3 sm:gap-6 flex-wrap">
                 {cast.map((actor, index) => (
-                  <div key={index} className="flex flex-col items-center space-y-2 transition-transform hover:scale-110 cursor-pointer">
+                  <div key={index} className="flex flex-col items-center space-y-1 sm:space-y-2 transition-transform hover:scale-110 cursor-pointer">
                     {actor.profile_path ? (
                       <img
                         src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
                         alt={actor.name}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-textPrimary/30 shadow-lg hover:border-accent transition-all"
+                        className="w-11 h-11 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-textPrimary/30 shadow-lg hover:border-accent transition-all"
                         onError={(e) => {
                           e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23333" width="100" height="100"/%3E%3Ctext fill="%23666" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="40"%3E?%3C/text%3E%3C/svg%3E';
                         }}
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center border-2 border-textPrimary/30 hover:border-accent transition-all">
-                        <span className="text-textSecond text-2xl">?</span>
+                      <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-surface flex items-center justify-center border-2 border-textPrimary/30 hover:border-accent transition-all">
+                        <span className="text-textSecond text-lg sm:text-2xl">?</span>
                       </div>
                     )}
-                    <p className="text-textPrimary text-xs font-medium text-center max-w-[80px] truncate">
+                    <p className="text-textPrimary text-[10px] sm:text-xs font-medium text-center max-w-[64px] sm:max-w-[80px] truncate">
                       {actor.name}
                     </p>
                   </div>
@@ -283,27 +285,27 @@ export default function Hero() {
             </div>
           )}
 
-          <p className="text-textPrimary text-lg max-w-2xl line-clamp-3 drop-shadow-lg">
+          <p className="text-textPrimary text-sm sm:text-lg max-w-2xl line-clamp-2 sm:line-clamp-3 drop-shadow-lg">
             {movie.description || 'No description available'}
           </p>
 
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0">
             <button
               onClick={() => console.log('Navigate to trailer')}
-              className="flex items-center space-x-2 bg-surface/70 backdrop-blur border border-border text-textPrimary px-8 py-3 rounded-full font-bold hover:bg-surfaceHover transition-all transform hover:scale-105 shadow-xl"
+              className="flex items-center justify-center space-x-2 bg-surface/70 backdrop-blur border border-border text-textPrimary px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-bold hover:bg-surfaceHover transition-all transform hover:scale-105 shadow-xl text-sm sm:text-base"
             >
-              <Play size={20} fill="currentColor" />
+              <Play size={18} fill="currentColor" />
               <span>Trailer</span>
             </button>
 
             <button
               onClick={toggleWatchlist}
               disabled={watchlistLoading}
-              className={`flex items-center space-x-2 px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl ${
+              className={`flex items-center justify-center space-x-2 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl text-sm sm:text-base ${
                 inWatchlist ? 'bg-success text-black hover:bg-success/80' : 'bg-accent text-black hover:bg-accentHover'
               }`}
             >
-              <Plus size={20} className={inWatchlist ? 'rotate-45' : ''} />
+              <Plus size={18} className={inWatchlist ? 'rotate-45' : ''} />
               <span>{watchlistLoading ? '...' : inWatchlist ? 'Added to Shelf' : 'Save for Later'}</span>
             </button>
           </div>
@@ -311,7 +313,7 @@ export default function Hero() {
       </section>
 
       {/*SHELF + BROWSE GRID */}
-      <div className="max-w-6xl mx-auto px-6 md:px-8 py-12 space-y-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-10 sm:space-y-16">
         <ShelfSection
           user={user}
           shelfItems={shelfItems}
