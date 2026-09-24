@@ -6,6 +6,7 @@ import { useWatchlist } from '../hooks/useWatchlist';
 import ShelfSection from '../components/ShelfSection';
 import BrowseSection from '../components/BrowseSection';
 
+
 export default function Hero() {
   //Carousel state
   const [movie, setMovie] = useState(null);
@@ -17,6 +18,11 @@ export default function Hero() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [allMovies, setAllMovies] = useState([]);
   const [inWatchlist, setInWatchlist] = useState(false);
+
+  //trailer
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [trailerKey, setTrailerKey] = useState(null);
+  const [trailerLoading, setTrailerLoading] = useState(false);
 
   //Shelf + browse grid state
   const [shelfItems, setShelfItems] = useState([]);
@@ -41,6 +47,27 @@ export default function Hero() {
       const result = await addToWatchlist(movie);
       if (result) setInWatchlist(true);
     }
+  };
+
+  const handlePlayTrailer = async () => {
+    if (!movie) return;
+    setTrailerLoading(true);
+    setShowTrailer(true);
+    try {
+      const res = await fetch(`http://localhost:3001/api/movie/${movie.id}/videos`);
+      const data = await res.json();
+      setTrailerKey(data.key);
+    } catch (err) {
+      console.error('Error fetching trailer:', err);
+      setTrailerKey(null);
+    } finally {
+      setTrailerLoading(false);
+    }
+  };
+
+  const closeTrailer = () => {
+    setShowTrailer(false);
+    setTrailerKey(null);
   };
 
   useEffect(() => {
@@ -291,7 +318,7 @@ export default function Hero() {
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0">
             <button
-              onClick={() => console.log('Navigate to trailer')}
+              onClick={handlePlayTrailer}
               className="flex items-center justify-center space-x-2 bg-surface/70 backdrop-blur border border-border text-textPrimary px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-bold hover:bg-surfaceHover transition-all transform hover:scale-105 shadow-xl text-sm sm:text-base"
             >
               <Play size={18} fill="currentColor" />
@@ -329,6 +356,43 @@ export default function Hero() {
           onAdd={handleAddToShelf}
         />
       </div>
+
+      {showTrailer && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={closeTrailer}
+        >
+          <div
+            className="relative w-full max-w-3xl aspect-video"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeTrailer}
+              className="absolute -top-10 right-0 text-textPrimary hover:text-accent transition-colors text-sm font-bold"
+            >
+              Close ✕
+            </button>
+
+            {trailerLoading ? (
+              <div className="w-full h-full flex items-center justify-center bg-surface rounded-lg">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-accent"></div>
+              </div>
+            ) : trailerKey ? (
+              <iframe
+                className="w-full h-full rounded-lg"
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                title="Trailer"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-surface rounded-lg text-textSecond">
+                No trailer available for this title.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

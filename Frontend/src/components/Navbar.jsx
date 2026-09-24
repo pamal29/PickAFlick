@@ -216,7 +216,7 @@ export default function Navbar() {
               className="flex items-center gap-2 bg-surface border border-border hover:border-accent
                 rounded-full pl-1 pr-3 py-1 transition-colors group"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center overflow-hidden">
+              <div className="w-7 h-7 rounded-full bg-surface border border-border flex items-center justify-center overflow-hidden">
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -224,9 +224,7 @@ export default function Navbar() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-black text-xs font-bold uppercase">
-                    {profile?.username?.[0] ?? '?'}
-                  </span>
+                  <UserCircle2 size={18} className="text-textMuted" />
                 )}
               </div>
               <span className="text-textSecond text-sm group-hover:text-textPrimary transition-colors">
@@ -280,7 +278,7 @@ export default function Navbar() {
         {user ? (
           <div className="px-6 py-5 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-secondary flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center shrink-0 overflow-hidden">
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -288,9 +286,7 @@ export default function Navbar() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-black font-bold text-sm uppercase">
-                    {profile?.username?.[0] ?? '?'}
-                  </span>
+                  <UserCircle2 size={24} className="text-textMuted" />
                 )}
               </div>
               <div>

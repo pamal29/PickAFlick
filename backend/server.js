@@ -160,6 +160,27 @@ app.get('/api/movie/:id/credits', async (req, res) => {
   }
 });
 
+//fetch trailer link
+app.get('/api/movie/:id/videos', async (req, res) => {
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${req.params.id}/videos?api_key=${process.env.TMDB_API_KEY}`
+    );
+    if (!response.ok) throw new Error('Failed to fetch videos');
+    const data = await response.json();
+
+    const trailer =
+      data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube' && v.official) ||
+      data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') ||
+      data.results.find(v => v.site === 'YouTube');
+
+    res.json({ key: trailer?.key || null });
+  } catch (err) {
+    console.error('Error fetching videos:', err);
+    res.status(500).json({ key: null, error: err.message });
+  }
+});
+
 // Fetch trending TV shows
 app.get('/api/trending', async (req, res) => {
   try {
