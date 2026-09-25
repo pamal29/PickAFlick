@@ -43,9 +43,13 @@ export default function Hero() {
     if (inWatchlist) {
       await removeFromWatchlist(movie);
       setInWatchlist(false);
+      setShelfItems(prev => prev.filter(i => i.id !== movie.id));
     } else {
       const result = await addToWatchlist(movie);
-      if (result) setInWatchlist(true);
+      if (result) {
+        setInWatchlist(true);
+        setShelfItems(prev => [...prev, { ...result, id: result.movie_id }]);
+      }
     }
   };
 
