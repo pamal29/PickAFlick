@@ -355,7 +355,6 @@ export default function Hero() {
         />
 
         <BrowseSection
-          allMovies={allMovies}
           onCardClick={goToDetails}
           onAdd={handleAddToShelf}
         />
