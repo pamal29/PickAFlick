@@ -161,7 +161,6 @@ app.get('/api/movie/:id/credits', async (req, res) => {
 });
 
 //fetch trailer link
-//fetch trailer link
 app.get('/api/movie/:id/videos', async (req, res) => {
   try {
     const response = await axios.get(`${TMDB_BASE_URL}/movie/${req.params.id}/videos`, {
@@ -336,11 +335,20 @@ app.get('/api/search', async (req, res) => {
 
 app.delete('/api/account/:userId', async (req, res) => {
   const { userId } = req.params;
+  try {
+    // clean up dependent rows first if cascade isn't confirmed (see #3)
+    await supabaseAdmin.from('watchlist').delete().eq('user_id', userId);
+    await supabaseAdmin.from('profiles').delete().eq('id', userId);
 
-  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    // delete the actual auth user — requires service role
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (error) throw error;
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Account deletion failed:', err);
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
 });
 
 // ─────────────────────────────────────────
