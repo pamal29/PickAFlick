@@ -19,12 +19,12 @@ export default function PosterCard({ item, onClick, featured = false, showRemove
           </div>
         )}
 
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-end p-3 opacity-0 group-hover:opacity-100">
-          <div className="flex items-center gap-1 text-star text-sm font-bold">
-            <Star size={14} fill="currentColor" />
-            {item.rating}
-          </div>
+        <div className="absolute bottom-2 left-2 bg-black/70 px-2 py-1 rounded flex items-center gap-1">
+          <Star size={12} className="text-star" fill="currentColor" />
+          <span className="text-xs font-bold">{item.rating}</span>
         </div>
+
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all opacity-0 group-hover:opacity-100" />
 
         <button
           onClick={(e) => {
