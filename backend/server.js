@@ -63,6 +63,70 @@ async function fetchHeroMovies() {
   }
 }
 
+// Get genre list (for filter dropdown)
+app.get('/api/genres/:type', async (req, res) => {
+  const { type } = req.params; //movie or tv
+  try {
+    const response = await axios.get(`${TMDB_BASE_URL}/genre/${type}/list`, {
+      params: { api_key: TMDB_API_KEY, language: 'en-US' },
+      timeout: 30000
+    });
+    res.json(response.data.genres);
+  } catch (error) {
+    console.error('❌ Error fetching genres:', error.message);
+    res.status(500).json({ error: 'Failed to fetch genres' });
+  }
+});
+
+// Browse/discover with filters
+app.get('/api/browse', async (req, res) => {
+  const { type = 'movie', genre, minRating, sortBy = 'popularity.desc', page = 1 } = req.query;
+
+  try {
+    const params = {
+      api_key: TMDB_API_KEY,
+      language: 'en-US',
+      sort_by: sortBy,
+      page,
+      include_adult: false
+    };
+    if (genre) params.with_genres = genre;
+    if (minRating) {
+      params['vote_average.gte'] = minRating;
+      params['vote_count.gte'] = 50; // avoid low-vote-count outliers skewing high ratings
+    }
+
+    const response = await axios.get(`${TMDB_BASE_URL}/discover/${type}`, {
+      params,
+      timeout: 30000
+    });
+
+    const results = response.data.results.map(item => ({
+      id: item.id,
+      title: item.title || item.name,
+      description: item.overview,
+      rating: item.vote_average ? item.vote_average.toFixed(1) : 'N/A',
+      releaseYear: (item.release_date || item.first_air_date)
+        ? new Date(item.release_date || item.first_air_date).getFullYear()
+        : 'N/A',
+      backdrop: item.backdrop_path ? TMDB_IMAGE_BASE + item.backdrop_path : null,
+      poster: item.poster_path ? TMDB_IMAGE_BASE + item.poster_path : null,
+      genreIds: item.genre_ids,
+      type
+    }));
+
+    res.json({
+      results,
+      page: response.data.page,
+      totalPages: response.data.total_pages
+    });
+  } catch (error) {
+    console.error('❌ Error fetching browse results:', error.message);
+    res.status(500).json({ error: 'Failed to fetch browse results' });
+  }
+});
+
+
 // Watchlist Routes
 
 // Add to watchlist
