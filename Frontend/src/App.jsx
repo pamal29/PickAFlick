@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import supabase from './supabaseClient.js';
 
@@ -12,8 +12,35 @@ import WatchlistPage from './pages/WatchlistPage';
 import Register from './pages/Register';
 import ProfileSettings from './pages/ProfileSettings.jsx';
 
-function App() {
+function AppRoutes() {
+  const location = useLocation();
+  const hideNavbar = ['/login', '/register'].includes(location.pathname);
 
+  return (
+    <div className="bg-black min-h-screen">
+      {!hideNavbar && <Navbar />}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Hero />
+              <Trending />
+            </>
+          }
+        />
+        <Route path="/movie/:id" element={<Moviedetails />} />
+        <Route path="/tv/:id" element={<TVShowdetails />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/watchlist" element={<WatchlistPage />} />
+        <Route path="/profile" element={<ProfileSettings />} />
+      </Routes>
+    </div>
+  );
+}
+
+function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) {
@@ -26,35 +53,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="bg-black min-h-screen">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Navbar />
-                <Hero />
-                <Trending />
-              </>
-            }
-          />
-
-          <Route path="/movie/:id" element={<Moviedetails />} />
-          <Route path="/tv/:id" element={<TVShowdetails />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/watchlist" element={<WatchlistPage />} />
-          <Route
-            path="/profile"
-            element={
-              <>
-                <Navbar />
-                <ProfileSettings />
-              </>
-            }
-          />
-        </Routes>
-      </div>
+      <AppRoutes />
     </BrowserRouter>
   );
 }
