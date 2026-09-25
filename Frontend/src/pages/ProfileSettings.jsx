@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import  supabase  from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { UserCircle2 } from 'lucide-react';
 
 export default function ProfileSettings() {
   const { user, profile, refreshProfile } = useAuth(); // refreshProfile: re-fetch profile after edits
@@ -93,8 +94,16 @@ export default function ProfileSettings() {
       {/* Avatar */}
       <div className="space-y-3">
         <h2 className="font-semibold text-lg">Profile Picture</h2>
-        {profile?.avatar_url && (
-          <img src={profile.avatar_url} alt="avatar" className="w-24 h-24 rounded-full object-cover border border-border" />
+        {profile?.avatar_url ? (
+          <img
+            src={profile.avatar_url}
+            alt="avatar"
+            className="w-24 h-24 rounded-full object-cover border border-border"
+          />
+        ) : (
+          <div className="w-24 h-24 rounded-full bg-surface flex items-center justify-center border border-border">
+            <UserCircle2 size={48} className="text-textSecond" />
+          </div>
         )}
         <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files[0])} />
         <button onClick={handleAvatarUpload} disabled={saving || !avatarFile}
