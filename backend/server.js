@@ -1,11 +1,19 @@
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const mongoose = require('mongoose');
-require('dotenv').config();
+
+
+console.log('URL:', process.env.SUPABASE_URL);
+console.log('KEY exists:', !!process.env.SUPABASE_KEY);
+console.log('SERVICE KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
