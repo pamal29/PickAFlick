@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Star, Calendar, Clock, Film } from "lucide-react";
 import { useAuth } from '../context/AuthContext';
+import { useWatchlist } from '../hooks/useWatchlist';
+import LoginRequiredModal from '../components/LoginRequiredModal';
 
 export default function Moviedetails() {
   const { id } = useParams();
@@ -9,8 +11,16 @@ export default function Moviedetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(false);
-  const [saving, setSaving] = useState(false);
+
   const { user, profile } = useAuth();
+  const {
+    checkInWatchlist,
+    addToWatchlist,
+    removeFromWatchlist,
+    loading: saving,
+    showLoginModal,
+    setShowLoginModal
+  } = useWatchlist(user, profile);
 
   useEffect(() => {
     async function fetchMovie() {
@@ -37,49 +47,20 @@ export default function Moviedetails() {
   }, [id]);
 
   useEffect(() => {
-    const userId = user?.id;
-    if(!userId ||!movie) return;
-
-    fetch(`http://localhost:3001/api/watchlist/${userId}/${movie.id}`)
-      .then((res) => res.json())
-      .then((data) => setInWatchlist(data.inWatchlist));
-  }, [movie]);
+    if (!movie) return;
+    checkInWatchlist(movie.id).then(setInWatchlist);
+  }, [movie, user]);
 
   const handleSave = async () => {
-    const userId = user?.id;
-    const username = profile?.username;
-    if (!userId) {
-      // no user logged in — decide: redirect to /login, or just return
-      return;
-    }
-
-    setSaving(true);
-    await fetch('http://localhost:3001/api/watchlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        username,
-        movieId: movie.id,       
-        title: movie.title,      
-        poster: movie.poster,    
-        type: 'movie'           
-      })
-    });
-    setInWatchlist(true);
-    setSaving(false);
+    if (!movie) return;
+    const result = await addToWatchlist({ ...movie, type: 'movie' });
+    if (result) setInWatchlist(true);
   };
 
   const handleRemove = async () => {
-    const userId = user?.id;
-    if (!userId) return;
-
-    setSaving(true);
-    await fetch(`http://localhost:3001/api/watchlist/${userId}/${movie.id}`, {
-      method: 'DELETE'
-    });
+    if (!movie) return;
+    await removeFromWatchlist(movie);
     setInWatchlist(false);
-    setSaving(false);
   };
 
   if (loading) {
@@ -212,20 +193,24 @@ export default function Moviedetails() {
             </div>
 
             {/* Save button */}
-           <button
-            onClick={inWatchlist ? handleRemove : handleSave}
-            disabled={saving}
-            className={`mt-8 flex items-center gap-2 px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed ${
-              inWatchlist
-                ? 'bg-danger text-white hover:bg-danger/80'
-                : 'bg-accent text-black hover:bg-accentHover'
-            }`}
-          >
-            {saving ? 'Saving...' : inWatchlist ? 'Remove from List' : 'Save for Later'}
-          </button>
+            <button
+              onClick={inWatchlist ? handleRemove : handleSave}
+              disabled={saving}
+              className={`mt-8 flex items-center gap-2 px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed ${
+                inWatchlist
+                  ? 'bg-danger text-white hover:bg-danger/80'
+                  : 'bg-accent text-black hover:bg-accentHover'
+              }`}
+            >
+              {saving ? 'Saving...' : inWatchlist ? 'Remove from List' : 'Save for Later'}
+            </button>
           </div>
         </div>
       </div>
+
+      {showLoginModal && (
+        <LoginRequiredModal onClose={() => setShowLoginModal(false)} />
+      )}
     </div>
   );
 }
