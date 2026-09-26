@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Star, Calendar, Clock, Film } from "lucide-react";
-import { useAuth } from '../context/AuthContext';
-import { useWatchlist } from '../hooks/useWatchlist';
-import LoginRequiredModal from '../components/LoginRequiredModal';
+import { Star, Calendar, Tv, Clock, PlayCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useWatchlist } from "../hooks/useWatchlist";
+import LoginRequiredModal from "../components/LoginRequiredModal";
 
-export default function Moviedetails() {
+export default function TVShowdetails() {
   const { id } = useParams();
-  const [movie, setMovie] = useState(null);
+  const [show, setShow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(false);
@@ -23,18 +23,18 @@ export default function Moviedetails() {
   } = useWatchlist(user, profile);
 
   useEffect(() => {
-    async function fetchMovie() {
+    async function fetchShow() {
       try {
-        console.log(`🔍 Fetching movie ID: ${id}`);
-        const res = await fetch(`http://localhost:3001/api/movie/${id}`);
+        console.log(`🔍 Fetching TV show ID: ${id}`);
+        const res = await fetch(`http://localhost:3001/api/tv/${id}`);
 
         if (!res.ok) {
-          throw new Error("Failed to fetch movie");
+          throw new Error("Failed to fetch TV show");
         }
 
         const data = await res.json();
-        console.log("✅ Movie loaded:", data.title);
-        setMovie(data);
+        console.log("✅ TV show loaded:", data.title);
+        setShow(data);
       } catch (err) {
         console.error("❌ Error:", err);
         setError(err.message);
@@ -43,23 +43,23 @@ export default function Moviedetails() {
       }
     }
 
-    fetchMovie();
+    fetchShow();
   }, [id]);
 
   useEffect(() => {
-    if (!movie) return;
-    checkInWatchlist(movie.id).then(setInWatchlist);
-  }, [movie, user]);
+    if (!show) return;
+    checkInWatchlist(show.id).then(setInWatchlist);
+  }, [show, user]);
 
   const handleSave = async () => {
-    if (!movie) return;
-    const result = await addToWatchlist({ ...movie, type: 'movie' });
+    if (!show) return;
+    const result = await addToWatchlist({ ...show, type: 'tv' });
     if (result) setInWatchlist(true);
   };
 
   const handleRemove = async () => {
-    if (!movie) return;
-    await removeFromWatchlist(movie);
+    if (!show) return;
+    await removeFromWatchlist(show);
     setInWatchlist(false);
   };
 
@@ -68,7 +68,7 @@ export default function Moviedetails() {
       <div className="bg-black min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-14 w-14 border-t-2 border-b-2 border-accent mx-auto mb-4"></div>
-          <div className="text-textPrimary text-xl">Loading movie...</div>
+          <div className="text-textPrimary text-xl">Loading TV show...</div>
         </div>
       </div>
     );
@@ -85,10 +85,10 @@ export default function Moviedetails() {
     );
   }
 
-  if (!movie) {
+  if (!show) {
     return (
       <div className="bg-black min-h-screen flex items-center justify-center">
-        <div className="text-textSecond text-xl">Movie not found</div>
+        <div className="text-textSecond text-xl">TV show not found</div>
       </div>
     );
   }
@@ -97,10 +97,10 @@ export default function Moviedetails() {
     <div className="bg-black min-h-screen text-textPrimary">
       {/* Backdrop banner */}
       <div className="relative w-full h-[45vh] overflow-hidden">
-        {movie.backdrop && (
+        {show.backdrop && (
           <img
-            src={movie.backdrop}
-            alt={movie.title}
+            src={show.backdrop}
+            alt={show.title}
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.style.display = "none";
@@ -114,8 +114,8 @@ export default function Moviedetails() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Poster */}
           <img
-            src={movie.poster}
-            alt={movie.title}
+            src={show.poster}
+            alt={show.title}
             className="w-56 md:w-72 h-auto rounded-xl shadow-2xl object-cover border border-border flex-shrink-0"
             onError={(e) => {
               e.target.src =
@@ -126,37 +126,37 @@ export default function Moviedetails() {
           {/* Details */}
           <div className="flex-1 pt-2 md:pt-32">
             <h1 className="text-3xl md:text-5xl font-bold mb-3 drop-shadow-xl">
-              {movie.title}
+              {show.title}
             </h1>
 
-            {movie.tagline && (
-              <p className="italic text-textSecond mb-4">"{movie.tagline}"</p>
+            {show.tagline && (
+              <p className="italic text-textSecond mb-4">"{show.tagline}"</p>
             )}
 
             {/* Info row */}
             <div className="flex flex-wrap items-center gap-4 mb-5">
               <div className="flex items-center gap-1 bg-surface px-3 py-1.5 rounded-full border border-border">
                 <Star className="text-star" fill="currentColor" size={16} />
-                <span className="font-bold text-star">{movie.rating}</span>
+                <span className="font-bold text-star">{show.rating}</span>
                 <span className="text-textMuted text-sm">/10</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-textSecond text-sm">
                 <Calendar size={16} />
-                {movie.releaseYear}
+                {show.releaseYear}
               </div>
 
-              {movie.status && (
+              {show.status && (
                 <span className="px-3 py-1 bg-accent/15 text-accent text-xs font-bold rounded-full border border-accent/30 uppercase tracking-wide">
-                  {movie.status}
+                  {show.status}
                 </span>
               )}
             </div>
 
             {/* Genre pills */}
-            {movie.genres && movie.genres.length > 0 && (
+            {show.genres && show.genres.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
-                {movie.genres.map((genre, i) => (
+                {show.genres.map((genre, i) => (
                   <span
                     key={i}
                     className="px-3 py-1 bg-surface text-textSecond text-sm rounded-full border border-border hover:border-accent hover:text-accent transition-colors cursor-default"
@@ -167,18 +167,31 @@ export default function Moviedetails() {
               </div>
             )}
 
-            {/* Runtime card */}
-            {movie.runtime && (
+            {/* Seasons / Episodes cards */}
+            {(show.numberOfSeasons || show.numberOfEpisodes) && (
               <div className="flex flex-wrap gap-4 mb-6">
-                <div className="flex items-center gap-2 bg-surface px-4 py-3 rounded-lg border border-border">
-                  <Clock className="text-secondary" size={20} />
-                  <div>
-                    <p className="text-textPrimary font-bold leading-none">
-                      {movie.runtime} min
-                    </p>
-                    <p className="text-textMuted text-xs mt-0.5">Runtime</p>
+                {show.numberOfSeasons && (
+                  <div className="flex items-center gap-2 bg-surface px-4 py-3 rounded-lg border border-border">
+                    <Tv className="text-secondary" size={20} />
+                    <div>
+                      <p className="text-textPrimary font-bold leading-none">
+                        {show.numberOfSeasons}
+                      </p>
+                      <p className="text-textMuted text-xs mt-0.5">Seasons</p>
+                    </div>
                   </div>
-                </div>
+                )}
+                {show.numberOfEpisodes && (
+                  <div className="flex items-center gap-2 bg-surface px-4 py-3 rounded-lg border border-border">
+                    <PlayCircle className="text-secondary" size={20} />
+                    <div>
+                      <p className="text-textPrimary font-bold leading-none">
+                        {show.numberOfEpisodes}
+                      </p>
+                      <p className="text-textMuted text-xs mt-0.5">Episodes</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -188,7 +201,7 @@ export default function Moviedetails() {
                 Overview
               </h2>
               <p className="text-lg leading-relaxed text-textPrimary/90">
-                {movie.overview || "No description available."}
+                {show.overview || "No description available."}
               </p>
             </div>
 
