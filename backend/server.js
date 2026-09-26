@@ -180,15 +180,16 @@ app.delete('/api/watchlist/:userId/:movieId', async (req, res) => {
 
 // Check if in watchlist
 app.get('/api/watchlist/:userId/check/:movieId', async (req, res) => {
+  const { type } = req.query; 
   const { data, error } = await supabase
     .from('watchlist')
     .select('id')
     .eq('user_id', req.params.userId)
     .eq('movie_id', Number(req.params.movieId))
-    .single();
+    .eq('type', type)
+    .maybeSingle(); 
 
-  if (error && error.code !== 'PGRST116') // PGRST116 = no rows found
-    return res.status(500).json({ error: error.message });
+  if (error) return res.status(500).json({ error: error.message });
   res.json({ inWatchlist: !!data });
 });
 

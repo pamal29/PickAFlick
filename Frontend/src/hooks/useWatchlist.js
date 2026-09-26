@@ -6,9 +6,9 @@ export function useWatchlist(user, profile) {
   const [loading, setLoading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const checkInWatchlist = async (movieId) => {
-    if (!user) return false; 
-    const res = await fetch(`${API}/${user.id}/check/${movieId}`);
+  const checkInWatchlist = async (movieId, type) => {
+    if (!user) return false;
+    const res = await fetch(`${API}/${user.id}/check/${movieId}?type=${type}`);
     const data = await res.json();
     return data.inWatchlist;
   };

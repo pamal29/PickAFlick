@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../hooks/useWatchlist';
 import ShelfSection from '../components/ShelfSection';
 import BrowseSection from '../components/BrowseSection';
-import LoginRequiredModal from '../components/LoginRequiredModel';
+import LoginRequiredModal from '../components/LoginRequiredModal';
 
 
 export default function Hero() {
