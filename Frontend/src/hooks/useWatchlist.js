@@ -4,9 +4,14 @@ const API = 'http://localhost:3001/api/watchlist';
 
 export function useWatchlist(user, profile) {
   const [loading, setLoading] = useState(false);
-
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
   const checkInWatchlist = async (movieId) => {
-    if (!user) return false;
+    if (!user) {
+      setShowLoginModal(true);
+      return false;
+    }
+    
     const res = await fetch(`${API}/${user.id}/check/${movieId}`);
     const data = await res.json();
     return data.inWatchlist;
@@ -29,6 +34,12 @@ export function useWatchlist(user, profile) {
       });
       if (res.status === 429) { alert('Watchlist full! (15 max)'); return null; }
       if (res.status === 409) return null;
+
+      if(!user){
+        setShowLoginModal(true);
+        return null;
+      }
+
       return await res.json();
     } finally {
       setLoading(false);
