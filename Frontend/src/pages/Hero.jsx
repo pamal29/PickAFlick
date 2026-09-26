@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../hooks/useWatchlist';
 import ShelfSection from '../components/ShelfSection';
 import BrowseSection from '../components/BrowseSection';
+import LoginRequiredModal from '../components/LoginRequiredModel';
 
 
 export default function Hero() {
@@ -30,14 +31,17 @@ export default function Hero() {
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { checkInWatchlist, addToWatchlist, removeFromWatchlist, loading: watchlistLoading } = useWatchlist(user, profile);
+  const {
+    checkInWatchlist,
+    addToWatchlist,
+    removeFromWatchlist,
+    loading: watchlistLoading,
+    showLoginModal,
+    setShowLoginModal
+  } = useWatchlist(user, profile);
 
   //Carousel's own save/remove toggle 
   const toggleWatchlist = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
     if (!movie) return;
 
     if (inWatchlist) {
@@ -80,10 +84,6 @@ export default function Hero() {
 
   //Shelf add/remove (used by browse grid + shelf grid) 
   const handleAddToShelf = async (item) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
     const newItem = await addToWatchlist(item);
     if (newItem) setShelfItems(prev => [...prev, ...(Array.isArray(newItem) ? newItem : [newItem])]);
   };
@@ -395,6 +395,10 @@ export default function Hero() {
             )}
           </div>
         </div>
+      )}
+
+      {showLoginModal && (
+        <LoginRequiredModal onClose={() => setShowLoginModal(false)} />
       )}
     </div>
   );
