@@ -1,7 +1,8 @@
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const express = require('express');
 const cors = require('cors');
@@ -22,7 +23,7 @@ app.use(express.json());
 
 app.use('/api/watchlist', watchlistRouter);
 app.use('/api/account', accountRouter);
-app.use('/api', tmdbRouter); // hero/all, genres, browse, movie/*, tv/*, trending*, search
+app.use('/api', tmdbRouter); 
 
 async function init() {
   console.log('\n🎬 TMDB Movie Server Starting...\n');
