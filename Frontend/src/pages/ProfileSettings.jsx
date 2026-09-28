@@ -14,6 +14,28 @@ export default function ProfileSettings() {
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const AVATARS = [
+  '/avatars/avatar1.svg',
+  '/avatars/avatar2.svg',
+  '/avatars/avatar3.svg',
+  '/avatars/avatar4.svg',
+  ];
+
+  const [selectedAvatar, setSelectedAvatar] = useState(profile?.avatar_url || '');
+
+  const handleAvatarSave = async () => {
+    if (!selectedAvatar) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ avatar_url: selectedAvatar })
+      .eq('id', user.id);
+    setStatus(error ? `Error: ${error.message}` : 'Avatar updated');
+    if (!error) refreshProfile?.();
+    setSaving(false);
+  };
+
+
   const handleUsernameUpdate = async () => {
     setSaving(true);
     const { error } = await supabase
@@ -94,21 +116,26 @@ export default function ProfileSettings() {
       {/* Avatar */}
       <div className="space-y-3">
         <h2 className="font-semibold text-lg">Profile Picture</h2>
-        {profile?.avatar_url ? (
-          <img
-            src={profile.avatar_url}
-            alt="avatar"
-            className="w-24 h-24 rounded-full object-cover border border-border"
-          />
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-surface flex items-center justify-center border border-border">
-            <UserCircle2 size={48} className="text-textSecond" />
-          </div>
-        )}
-        <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files[0])} />
-        <button onClick={handleAvatarUpload} disabled={saving || !avatarFile}
-          className="bg-accent text-black px-4 py-2 rounded-full font-bold disabled:opacity-50">
-          Upload
+        <div className="flex gap-4">
+          {AVATARS.map((src) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => setSelectedAvatar(src)}
+              className={`rounded-full p-1 border-2 transition ${
+                selectedAvatar === src ? 'border-accent' : 'border-transparent hover:border-border'
+              }`}
+            >
+              <img src={src} alt="avatar option" className="w-16 h-16 rounded-full object-cover" />
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleAvatarSave}
+          disabled={saving || !selectedAvatar || selectedAvatar === profile?.avatar_url}
+          className="bg-accent text-black px-4 py-2 rounded-full font-bold disabled:opacity-50"
+        >
+          Save Avatar
         </button>
       </div>
 
