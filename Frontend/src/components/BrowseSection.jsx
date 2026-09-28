@@ -15,6 +15,9 @@ export default function BrowseSection({ onCardClick, onAdd }) {
   const [sortBy, setSortBy] = useState('popularity.desc');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // Fetch genre list whenever type changes (movie genres ≠ tv genres)
   useEffect(() => {
@@ -25,19 +28,55 @@ export default function BrowseSection({ onCardClick, onAdd }) {
       .catch(err => console.error('Error fetching genres:', err));
   }, [type]);
 
-  // Fetch browse results whenever any filter changes
-  useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams({ type, sortBy, page: 1 });
+  // Shared fetcher: page 1 replaces the list, later pages append to it
+  const fetchPage = async (pageNum, { signal } = {}) => {
+    const params = new URLSearchParams({ type, sortBy, page: pageNum });
     if (selectedGenre) params.set('genre', selectedGenre);
     if (minRating) params.set('minRating', minRating);
 
-    fetch(`http://localhost:3001/api/browse?${params}`)
-      .then(res => res.json())
-      .then(data => setItems(data.results || []))
-      .catch(err => console.error('Error fetching browse results:', err))
-      .finally(() => setLoading(false));
+    const res = await fetch(`http://localhost:3001/api/browse?${params}`, { signal });
+    return res.json();
+  };
+
+  // Filters changed: reset to page 1
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setPage(1);
+
+    fetchPage(1, { signal: controller.signal })
+      .then(data => {
+        setItems(data.results || []);
+        setTotalPages(data.totalPages || 1);
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') console.error('Error fetching browse results:', err);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [type, selectedGenre, minRating, sortBy]);
+
+  const handleLoadMore = async () => {
+    const next = page + 1;
+    setLoadingMore(true);
+    try {
+      const data = await fetchPage(next);
+      setItems(prev => {
+        // TMDB pages can overlap when popularity shifts, so dedupe by id
+        const seen = new Set(prev.map(i => i.id));
+        return [...prev, ...(data.results || []).filter(i => !seen.has(i.id))];
+      });
+      setPage(next);
+      setTotalPages(data.totalPages || totalPages);
+    } catch (err) {
+      console.error('Error loading more:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <section>
