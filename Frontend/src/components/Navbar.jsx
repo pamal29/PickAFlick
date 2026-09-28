@@ -204,10 +204,7 @@ export default function Navbar() {
             )}
           </div>
 
-          <button className="relative text-textSecond hover:text-secondary transition-colors">
-            <Bell size={20} />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent" />
-          </button>
+          
 
           {/* Auth — avatar or login button */}
           {user ? (
