@@ -18,6 +18,14 @@ function AppRoutes() {
 
   return (
     <div className="bg-black min-h-screen">
+
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: { background: '#1a1a1a', color: '#fff', border: '1px solid #2a2a2a' },
+        }}
+      />
+      
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route

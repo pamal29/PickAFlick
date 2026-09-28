@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 const API = 'http://localhost:3001/api/watchlist';
 
@@ -8,7 +9,11 @@ export function useWatchlist(user, profile) {
 
   const checkInWatchlist = async (movieId, type) => {
     if (!user) return false;
-    const res = await fetch(`${API}/${user.id}/check/${movieId}?type=${type}`);
+
+    const res = await fetch(
+      `${API}/${user.id}/check/${movieId}?type=${type}`
+    );
+
     const data = await res.json();
     return data.inWatchlist;
   };
@@ -18,24 +23,44 @@ export function useWatchlist(user, profile) {
       setShowLoginModal(true);
       return null;
     }
+
     setLoading(true);
+
     try {
       const res = await fetch(API, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           userId: user.id,
           username: profile?.username,
           movieId: item.id,
           title: item.title,
           poster: item.poster,
-          type: item.type ?? type
-        })
+          type: item.type ?? type,
+        }),
       });
-      if (res.status === 429) { alert('Watchlist full! (15 max)'); return null; }
-      if (res.status === 409) return null;
 
-      return await res.json();
+      // Watchlist limit reached
+      if (res.status === 429) {
+        toast.error('Your watchlist is full (15 max)');
+        return null;
+      }
+
+      // Already in watchlist
+      if (res.status === 409) {
+        return null;
+      }
+
+      const data = await res.json();
+
+      toast.success('Added to watchlist');
+
+      return data;
+    } catch (error) {
+      toast.error('Something went wrong, try again');
+      return null;
     } finally {
       setLoading(false);
     }
@@ -43,9 +68,24 @@ export function useWatchlist(user, profile) {
 
   const removeFromWatchlist = async (item) => {
     if (!user) return;
+
     setLoading(true);
+
     try {
-      await fetch(`${API}/${user.id}/${item.movie_id ?? item.id}`, { method: 'DELETE' });
+      const res = await fetch(
+        `${API}/${user.id}/${item.movie_id ?? item.id}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error('Failed to remove from watchlist');
+      }
+
+      toast.success('Removed from watchlist');
+    } catch (error) {
+      toast.error('Something went wrong, try again');
     } finally {
       setLoading(false);
     }
@@ -57,6 +97,6 @@ export function useWatchlist(user, profile) {
     removeFromWatchlist,
     loading,
     showLoginModal,
-    setShowLoginModal
+    setShowLoginModal,
   };
 }
