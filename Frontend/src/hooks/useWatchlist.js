@@ -9,13 +9,15 @@ export function useWatchlist(user, profile) {
 
   const checkInWatchlist = async (movieId, type) => {
     if (!user) return false;
-
-    const res = await fetch(
-      `${API}/${user.id}/check/${movieId}?type=${type}`
-    );
-
-    const data = await res.json();
-    return data.inWatchlist;
+    try {
+      const res = await fetch(`${API}/${user.id}/check/${movieId}?type=${type}`);
+      if (!res.ok) return false;
+      const data = await res.json();
+      return data.inWatchlist;
+    } catch (error) {
+      console.error('Watchlist check failed:', error);
+      return false;
+    }
   };
 
   const addToWatchlist = async (item, type = 'movie') => {
@@ -25,13 +27,10 @@ export function useWatchlist(user, profile) {
     }
 
     setLoading(true);
-
     try {
       const res = await fetch(API, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           username: profile?.username,
@@ -42,23 +41,23 @@ export function useWatchlist(user, profile) {
         }),
       });
 
-      // Watchlist limit reached
       if (res.status === 429) {
-        toast.error('Your watchlist is full (15 max)');
+        toast.error('Your watchlist is full (15 max). Remove something to add more.');
         return null;
       }
-
-      // Already in watchlist
       if (res.status === 409) {
+        toast('Already in your watchlist');
         return null;
+      }
+      if (!res.ok) {
+        throw new Error(`Add failed with status ${res.status}`);
       }
 
       const data = await res.json();
-
       toast.success('Added to watchlist');
-
       return data;
     } catch (error) {
+      console.error(error);
       toast.error('Something went wrong, try again');
       return null;
     } finally {
@@ -66,26 +65,24 @@ export function useWatchlist(user, profile) {
     }
   };
 
-  const removeFromWatchlist = async (item) => {
-    if (!user) return;
+  const removeFromWatchlist = async (item, type) => {
+    if (!user) return false;
 
+    const mediaType = type ?? item.type ?? 'movie';
     setLoading(true);
-
     try {
       const res = await fetch(
-        `${API}/${user.id}/${item.movie_id ?? item.id}`,
-        {
-          method: 'DELETE',
-        }
+        `${API}/${user.id}/${item.movie_id ?? item.id}?type=${mediaType}`,
+        { method: 'DELETE' }
       );
-
-      if (!res.ok) {
-        throw new Error('Failed to remove from watchlist');
-      }
+      if (!res.ok) throw new Error(`Remove failed with status ${res.status}`);
 
       toast.success('Removed from watchlist');
+      return true;
     } catch (error) {
+      console.error(error);
       toast.error('Something went wrong, try again');
+      return false;
     } finally {
       setLoading(false);
     }

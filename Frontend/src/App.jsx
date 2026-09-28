@@ -11,6 +11,7 @@ import Login from './pages/Login.jsx';
 import WatchlistPage from './pages/WatchlistPage';
 import Register from './pages/Register';
 import ProfileSettings from './pages/ProfileSettings.jsx';
+import {Toaster} from 'react-hot-toast';
 
 function AppRoutes() {
   const location = useLocation();
@@ -25,7 +26,7 @@ function AppRoutes() {
           style: { background: '#1a1a1a', color: '#fff', border: '1px solid #2a2a2a' },
         }}
       />
-      
+
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route
