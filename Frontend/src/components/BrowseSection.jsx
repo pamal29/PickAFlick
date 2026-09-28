@@ -144,6 +144,7 @@ export default function BrowseSection({ onCardClick, onAdd }) {
       ) : items.length === 0 ? (
         <p className="text-textSecond text-center py-12">No results match these filters.</p>
       ) : (
+        <>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
           {items.map((item, i) => (
             <PosterCard
@@ -155,6 +156,19 @@ export default function BrowseSection({ onCardClick, onAdd }) {
             />
           ))}
         </div>
+
+        {page < totalPages && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="px-6 py-2.5 rounded-full border border-border bg-surface text-sm font-semibold hover:border-accent transition-colors disabled:opacity-50"
+            >
+              {loadingMore ? 'Loading…' : 'Load more'}
+            </button>
+          </div>
+        )}
+      </>
       )}
     </section>
   );
