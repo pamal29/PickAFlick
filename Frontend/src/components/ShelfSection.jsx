@@ -1,5 +1,6 @@
 import { Bookmark } from 'lucide-react';
 import PosterCard from './PosterCard';
+import PosterCardSkeleton from './PosterCardSkeleton';
 
 export default function ShelfSection({ user, shelfItems, shelfLoading, onNavigateLogin, onCardClick, onRemove }) {
   return (
@@ -20,7 +21,11 @@ export default function ShelfSection({ user, shelfItems, shelfLoading, onNavigat
           </button>
         </div>
       ) : shelfLoading ? (
-        <div className="text-textMuted">Loading your shelf...</div>
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <PosterCardSkeleton key={i} />
+          ))}
+        </div>
       ) : shelfItems.length === 0 ? (
         <div className="bg-surface border border-dashed border-border rounded-xl p-10 text-center">
           <p className="text-textSecond text-lg mb-1">Your shelf is empty</p>
