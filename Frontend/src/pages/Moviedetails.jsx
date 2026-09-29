@@ -4,6 +4,7 @@ import { Star, Calendar, Clock, Film } from "lucide-react";
 import { useAuth } from '../context/AuthContext';
 import { useWatchlist } from '../hooks/useWatchlist';
 import LoginRequiredModal from '../components/LoginRequiredModal';
+import DetailsSkeleton from "../components/DetailsSkeleton";
 
 export default function Moviedetails() {
   const { id } = useParams();
@@ -63,16 +64,7 @@ export default function Moviedetails() {
     setInWatchlist(false);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-black min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-14 w-14 border-t-2 border-b-2 border-accent mx-auto mb-4"></div>
-          <div className="text-textPrimary text-xl">Loading movie...</div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <DetailsSkeleton />;
 
   if (error) {
     return (
