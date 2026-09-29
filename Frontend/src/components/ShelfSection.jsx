@@ -1,6 +1,7 @@
 import { Bookmark } from 'lucide-react';
 import PosterCard from './PosterCard';
 import PosterCardSkeleton from './PosterCardSkeleton';
+import { MAX_SHELF } from '../hooks/useWatchlist';
 
 export default function ShelfSection({ user, shelfItems, shelfLoading, onNavigateLogin, onCardClick, onRemove }) {
   return (
@@ -10,7 +11,15 @@ export default function ShelfSection({ user, shelfItems, shelfLoading, onNavigat
           <Bookmark className="text-accent" size={22} />
           <h2 className="text-2xl font-bold">Your Shelf</h2>
         </div>
-        {shelfItems.length > 0 && <span className="text-textMuted text-sm">{shelfItems.length} saved</span>}
+        {shelfItems.length > 0 && (
+          <span
+            className={`text-sm ${
+              shelfItems.length >= MAX_SHELF ? 'text-danger font-semibold' : 'text-textMuted'
+            }`}
+          >
+            {shelfItems.length}/{MAX_SHELF} saved
+          </span>
+        )}
       </div>
 
       {!user ? (

@@ -1,13 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+export const MAX_SHELF = 15;
 const API = 'http://localhost:3001/api/watchlist';
 
 export function useWatchlist(user, profile) {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const checkInWatchlist = async (movieId, type) => {
+  const checkInWatchlist = async (movieId, type= 'movie') => {
     if (!user) return false;
     try {
       const res = await fetch(`${API}/${user.id}/check/${movieId}?type=${type}`);
@@ -42,7 +45,23 @@ export function useWatchlist(user, profile) {
       });
 
       if (res.status === 429) {
-        toast.error('Your watchlist is full (15 max). Remove something to add more.');
+        toast(
+          (t) => (
+            <span className="flex items-center gap-3">
+              Your shelf is full ({MAX_SHELF}/{MAX_SHELF}). Remove a title to add a new one.
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  navigate('/watchlist');
+                }}
+                className="font-bold text-accent underline whitespace-nowrap"
+              >
+                View shelf
+              </button>
+            </span>
+          ),
+          { id: 'shelf-full', duration: 5000 }
+        );
         return null;
       }
       if (res.status === 409) {
