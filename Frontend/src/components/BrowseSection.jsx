@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PosterCard from './PosterCard';
+import PosterCardSkeleton from './PosterCardSkeleton';
 
 const SORT_OPTIONS = [
   { value: 'popularity.desc', label: 'Most Popular' },
@@ -138,8 +139,10 @@ export default function BrowseSection({ onCardClick, onAdd }) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-accent"></div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <PosterCardSkeleton key={i} />
+          ))}
         </div>
       ) : items.length === 0 ? (
         <p className="text-textSecond text-center py-12">No results match these filters.</p>
@@ -155,6 +158,10 @@ export default function BrowseSection({ onCardClick, onAdd }) {
               onAdd={onAdd}
             />
           ))}
+          {loadingMore &&
+            Array.from({ length: 5 }).map((_, i) => (
+              <PosterCardSkeleton key={`skeleton-${i}`} />
+            ))}
         </div>
 
         {page < totalPages && (
