@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import PosterCard from './PosterCard';
 import PosterCardSkeleton from './PosterCardSkeleton';
 
@@ -16,49 +17,52 @@ export default function BrowseSection({ onCardClick, onAdd }) {
   const [sortBy, setSortBy] = useState('popularity.desc');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Fetch genre list whenever type changes (movie genres ≠ tv genres)
   useEffect(() => {
-    setSelectedGenre(''); // reset genre filter on type switch, ids don't match across movie/tv
+    setSelectedGenre('');
     fetch(`http://localhost:3001/api/genres/${type}`)
       .then(res => res.json())
       .then(setGenres)
       .catch(err => console.error('Error fetching genres:', err));
   }, [type]);
 
-  // Shared fetcher: page 1 replaces the list, later pages append to it
   const fetchPage = async (pageNum, { signal } = {}) => {
     const params = new URLSearchParams({ type, sortBy, page: pageNum });
     if (selectedGenre) params.set('genre', selectedGenre);
     if (minRating) params.set('minRating', minRating);
 
     const res = await fetch(`http://localhost:3001/api/browse?${params}`, { signal });
+    if (!res.ok) throw new Error(`Request failed: ${res.status}`);
     return res.json();
   };
 
-  // Filters changed: reset to page 1
+  const loadFirstPage = useCallback(async (signal) => {
+    setLoading(true);
+    setError(false);
+    setPage(1);
+    try {
+      const data = await fetchPage(1, { signal });
+      setItems(data.results || []);
+      setTotalPages(data.totalPages || 1);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Error fetching browse results:', err);
+        setError(true);
+      }
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, [type, selectedGenre, minRating, sortBy]);
+
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
-    setPage(1);
-
-    fetchPage(1, { signal: controller.signal })
-      .then(data => {
-        setItems(data.results || []);
-        setTotalPages(data.totalPages || 1);
-      })
-      .catch(err => {
-        if (err.name !== 'AbortError') console.error('Error fetching browse results:', err);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-
+    loadFirstPage(controller.signal);
     return () => controller.abort();
-  }, [type, selectedGenre, minRating, sortBy]);
+  }, [loadFirstPage]);
 
   const handleLoadMore = async () => {
     const next = page + 1;
@@ -66,7 +70,6 @@ export default function BrowseSection({ onCardClick, onAdd }) {
     try {
       const data = await fetchPage(next);
       setItems(prev => {
-        // TMDB pages can overlap when popularity shifts, so dedupe by id
         const seen = new Set(prev.map(i => i.id));
         return [...prev, ...(data.results || []).filter(i => !seen.has(i.id))];
       });
@@ -74,6 +77,7 @@ export default function BrowseSection({ onCardClick, onAdd }) {
       setTotalPages(data.totalPages || totalPages);
     } catch (err) {
       console.error('Error loading more:', err);
+      toast.error("Couldn't load more titles. Please try again.");
     } finally {
       setLoadingMore(false);
     }
@@ -144,38 +148,51 @@ export default function BrowseSection({ onCardClick, onAdd }) {
             <PosterCardSkeleton key={i} />
           ))}
         </div>
+      ) : error ? (
+        <div className="bg-surface border border-border rounded-xl p-10 text-center">
+          <p className="text-textPrimary text-lg mb-1">Something went wrong</p>
+          <p className="text-textMuted text-sm mb-5">
+            We couldn't load titles right now. Please try again.
+          </p>
+          <button
+            onClick={() => loadFirstPage()}
+            className="bg-accent text-black px-6 py-2.5 rounded-full font-bold hover:bg-accentHover transition-all"
+          >
+            Retry
+          </button>
+        </div>
       ) : items.length === 0 ? (
         <p className="text-textSecond text-center py-12">No results match these filters.</p>
       ) : (
         <>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
-          {items.map((item, i) => (
-            <PosterCard
-              key={item.id}
-              item={item}
-              onClick={() => onCardClick(item)}
-              featured={i % 7 === 0}
-              onAdd={onAdd}
-            />
-          ))}
-          {loadingMore &&
-            Array.from({ length: 5 }).map((_, i) => (
-              <PosterCardSkeleton key={`skeleton-${i}`} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+            {items.map((item, i) => (
+              <PosterCard
+                key={item.id}
+                item={item}
+                onClick={() => onCardClick(item)}
+                featured={i % 7 === 0}
+                onAdd={onAdd}
+              />
             ))}
-        </div>
-
-        {page < totalPages && (
-          <div className="flex justify-center mt-8">
-            <button
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              className="px-6 py-2.5 rounded-full border border-border bg-surface text-sm font-semibold hover:border-accent transition-colors disabled:opacity-50"
-            >
-              {loadingMore ? 'Loading…' : 'Load more'}
-            </button>
+            {loadingMore &&
+              Array.from({ length: 5 }).map((_, i) => (
+                <PosterCardSkeleton key={`skeleton-${i}`} />
+              ))}
           </div>
-        )}
-      </>
+
+          {page < totalPages && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-6 py-2.5 rounded-full border border-border bg-surface text-sm font-semibold hover:border-accent transition-colors disabled:opacity-50"
+              >
+                {loadingMore ? 'Loading…' : 'Load more'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
