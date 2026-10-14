@@ -751,13 +751,6 @@ export default function Hero() {
               Keep track of what you love and find something new.
             </p>
           </div>
-
-          <button
-            onClick={() => navigate(user ? '/profile' : '/login')}
-            className="self-start sm:self-auto text-sm font-semibold text-gray-400 hover:text-violet-300 transition"
-          >
-            {user ? 'Your profile ↗' : 'Sign in ↗'}
-          </button>
         </div>
 
         {/* Existing components are preserved */}

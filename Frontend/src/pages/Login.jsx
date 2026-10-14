@@ -48,7 +48,18 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen bg-black flex items-center justify-center px-4 overflow-hidden">
+    <div 
+    className="relative min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden bg-cover bg-center bg-no-repeat"
+    style={{
+      backgroundImage: `
+        linear-gradient(
+          rgba(8, 9, 13, 0.45),
+          rgba(8, 9, 13, 0.65)
+        ),
+        url('/images/pickaflick-login-bg.png')
+      `,
+    }}
+    >
       {/* Cinematic backdrop */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(61,90,254,0.25),transparent_60%)]" />
