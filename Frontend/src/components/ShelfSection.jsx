@@ -38,7 +38,7 @@ export default function ShelfSection({ user, shelfItems, shelfLoading, onNavigat
       ) : shelfItems.length === 0 ? (
         <div className="bg-surface border border-dashed border-border rounded-xl p-10 text-center">
           <p className="text-textSecond text-lg mb-1">Your shelf is empty</p>
-          <p className="text-textMuted text-sm">Start collecting — tap "Save for Later" on anything you like.</p>
+          <p className="text-textMuted text-sm">Start collecting,  Just click "Save for Later" on anything you like.</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
